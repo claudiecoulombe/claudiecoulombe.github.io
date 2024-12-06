@@ -1,14 +1,16 @@
 # Analytics Portfolio
 
-Welcome to my analytics portfolio! Here, I showcase projects that illustrate my work in people analytics, data science, and data analysis.
+Welcome to my analytics portfolio! This is a collection of projects I’ve created to highlight my approach to solving business challenges in people analytics, data science, and data analysis.
 
 ## Projects
-- [Employee Turnover Analysis](https://github.com/claudiecoulombe/analytics_portfolio/tree/main/Employee%20Turnover): Analyzing turnover trends and recommendations for retention.
-- Predictive Performance Modeling: Using assessment scores (e.g., cognitive ability, personality traits, technical skills) to predict job performance or productivity. This is an example of a local validation study.
-- Competency-Based Team Optimization Project: By creating groups that are either highly cohesive (minimizing competency differences within teams) or highly diverse (maximizing competency differences within teams), this analysis aims to support strategic team-building for varied project needs, such as projects requiring rapid consensus or innovation-driven initiatives.
-- Remote Work Productivity Analysis: Explore differences in productivity, engagement, and turnover rates among remote, hybrid, and on-site employees. Assess which work modes yield the highest levels of productivity and employee satisfaction, as well as how remote work policies impact turnover or engagement.
 
-## Skills
-- **Programming**: R, SQL
-- **Data Visualization**: Power BI
-- **Analysis Techniques**: Descriptive statistics, t-tests, ANOVAs, regression, clustering, psychometrics
+### Predicting and Understanding Employee Turnover
+In this project, I analyzed employee turnover at Fictional Solutions Inc. to uncover key drivers and identify employees at risk of leaving, offering insights to guide future retention programs and strategies.
+
+**Key Deliverables**:
+- **[R Shiny Dashboard](https://github.com/claudiecoulombe/analytics_portfolio/tree/main/Employee%20Turnover): Analyzing turnover trends and recommendations for retention.
+- [Dashboard](https://5yurvz-claudiecoulombe.shinyapps.io/employee_turnover/)**: An interactive tool designed for key stakeholders to visualize turnover trends and explore relationships between turnover and variables such as satisfaction, workload, salary, and performance levels. More suitable for stakeholders, it provides an interactive overview of the analysis, including a summary of key findings on the main page.
+- **Quarto Report**: A detailed Markdown report summarizing the analysis, key analytical decisions, findings, and recommendations. More suitable for internal data professionals at Fictional Logistics Inc., it can be used for transparency and replicability purposes.
+
+### Validating a Selection Approach
+In this project, I validated a selection methodology that incorporated multiple assessment scores. The analysis focused on evaluating whether the combined scores predicted performance more effectively than each score individually.
