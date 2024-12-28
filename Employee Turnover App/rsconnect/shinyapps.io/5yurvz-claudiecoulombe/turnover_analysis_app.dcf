@@ -1,0 +1,12 @@
+name: turnover_analysis_app
+title: turnover_analysis_app
+username: 5yurvz-claudiecoulombe
+account: 5yurvz-claudiecoulombe
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13625804
+bundleId: 9547616
+url: https://5yurvz-claudiecoulombe.shinyapps.io/turnover_analysis_app/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
