@@ -6,7 +6,7 @@ Welcome to my analytics portfolio! This is a collection of projects I’ve creat
 
 ### (1) Turnover Prediction App
 
--[View app](https://5yurvz-claudiecoulombe.shinyapps.io/turnover_analysis/)
+[View app](https://5yurvz-claudiecoulombe.shinyapps.io/turnover_analysis/)
 
 Built in R Shiny, this app offers an interactive platform for employee turnover analysis. Users can upload their own dataset (or use the default dataset integrated into the app for demonstration purposes), choose which variable(s) to use as predictors and which as the outcome, train three machine learning models—logistic regression, random forest, and multilayer perceptron—and tune hyperparameters. The app allows users to evaluate model performance on both training and test sets, predict which employees are at risk of turnover, download a CSV with risk predictions, and run mini experiments to see how adjusting different predictors would influence turnover risk probabilities.
 
