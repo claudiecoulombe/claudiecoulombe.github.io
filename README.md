@@ -6,7 +6,7 @@ Welcome to my analytics portfolio! This is a collection of projects I’ve creat
 
 ### (1) Turnover Prediction App
 
-[View app](https://5yurvz-claudiecoulombe.shinyapps.io/turnover_analysis/) | [View Code](https://github.com/claudiecoulombe/claudiecoulombe.github.io/tree/main/employee_turnover_app)
+[💡 View app](https://5yurvz-claudiecoulombe.shinyapps.io/turnover_analysis/) | [💻 View Code](https://github.com/claudiecoulombe/claudiecoulombe.github.io/tree/main/employee_turnover_app)
 
 _Key Skills Used: R, Shiny, Quarto, Exploratory Data Analysis, Data Visualization (ggplot2, highcharter, plotly), Logistic Regression, Random Forest, Multilayer Perceptron_
 
@@ -27,7 +27,7 @@ Examples of extensions of this app in other fields include:
 - Manufacturing: Predicting whether a piece of equipment will fail (1) or not fail (0) in a given time frame.
 
 ### (2) Exploring Employee Attrition with SQL
-[View Report](attrition_analysis_SQL/docs/employee_attrition_sql.html) | [View Code](https://github.com/claudiecoulombe/claudiecoulombe.github.io/tree/main/attrition_analysis_SQL)
+[📊 View Report](attrition_analysis_SQL/docs/employee_attrition_sql.html) | [💻 View Code](https://github.com/claudiecoulombe/claudiecoulombe.github.io/tree/main/attrition_analysis_SQL)
 
 _Key Skills Used: PostgreSQL, pgAdmin, Integrating SQL with R, Data Visualization (ggplot2, highcharter), Quarto, Report Building_
 
