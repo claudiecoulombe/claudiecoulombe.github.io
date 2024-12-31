@@ -6,7 +6,9 @@ Welcome to my analytics portfolio! This is a collection of projects I’ve creat
 
 ### (1) Turnover Prediction App
 
-[View app](https://5yurvz-claudiecoulombe.shinyapps.io/turnover_analysis/) | [View Code] (Employee Turnover App)
+💡[View app](https://5yurvz-claudiecoulombe.shinyapps.io/turnover_analysis/) | 💻 [View Code](https://github.com/claudiecoulombe/claudiecoulombe.github.io/tree/main/employee_turnover_app)
+
+_Key Skills Used: R, Shiny, Quarto, Exploratory Data Analysis, Data Visualization (ggplot2, highcharter, plotly), Logistic Regression, Random Forest, Multilayer Perceptron_
 
 Built in R Shiny, this app offers an interactive platform for employee turnover analysis. Users can upload their own dataset (or use the default dataset integrated into the app for demonstration purposes), choose which variable(s) to use as predictors and which as the outcome, train three machine learning models—logistic regression, random forest, and multilayer perceptron—and tune hyperparameters. The app allows users to evaluate model performance on both training and test sets, predict which employees are at risk of turnover, download a CSV with risk predictions, and run mini experiments to see how adjusting different predictors would influence turnover risk probabilities.
 
@@ -25,6 +27,8 @@ Examples of extensions of this app in other fields include:
 - Manufacturing: Predicting whether a piece of equipment will fail (1) or not fail (0) in a given time frame.
 
 ### (2) Exploring Employee Attrition with SQL
-[View Report](attrition_analysis_SQL/employee_experience.html) | [View Code](https://github.com/claudiecoulombe/claudiecoulombe.github.io/blob/main/Attrition%20Analysis%20-%20SQL/employee_experience.qmd)
+📊 [View Report](attrition_analysis_SQL/docs/employee_attrition_sql.html) | 💻 [View Code](https://github.com/claudiecoulombe/claudiecoulombe.github.io/tree/main/attrition_analysis_SQL)
+
+_Key Skills Used: PostgreSQL, pgAdmin, Integrating SQL with R, Data Visualization (ggplot2, highcharter), Quarto, Report Building_
 
 This project explores patterns of employee attrition at NovaTech Solutions, a fictional mid-sized tech company, using SQL for data extraction, transformation, and analysis, and R for visualization. The dataset was modeled in a PostgreSQL database, simulating real-world HR analytics workflows. Descriptive trends were analyzed to uncover potential areas of focus for improving retention. Actionable recommendations for next steps are provided. 
