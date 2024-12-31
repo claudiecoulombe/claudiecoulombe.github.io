@@ -25,6 +25,6 @@ Examples of extensions of this app in other fields include:
 - Manufacturing: Predicting whether a piece of equipment will fail (1) or not fail (0) in a given time frame.
 
 ### (2) Exploring Employee Attrition with SQL
-[View Report](Attrition Analysis - SQL/employee_experience.html)| [View Code](https://github.com/claudiecoulombe/claudiecoulombe.github.io/blob/main/Attrition%20Analysis%20-%20SQL/employee_experience.qmd)
+[View Report](attrition_analysis_sql/employee_experience.html)| [View Code](https://github.com/claudiecoulombe/claudiecoulombe.github.io/blob/main/Attrition%20Analysis%20-%20SQL/employee_experience.qmd)
 
 This project explores patterns of employee attrition at NovaTech Solutions, a fictional mid-sized tech company, using SQL for data extraction, transformation, and analysis, and R for visualization. The dataset was modeled in a PostgreSQL database, simulating real-world HR analytics workflows. Descriptive trends were analyzed to uncover potential areas of focus for improving retention. Actionable recommendations for next steps are provided. 
