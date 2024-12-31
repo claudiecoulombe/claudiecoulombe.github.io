@@ -1,0 +1,1044 @@
+---
+title: "Employee Attrition: Preliminary Insights"
+format:
+  html:
+    theme: flatly
+    highlight-style: kate
+    fontsize: 10pt
+    embed-resources: true
+    self-contained-math: true
+    code-fold: true
+    code-summary: "Show the code"
+    code-overflow: wrap
+    code-block-bg: true
+    code-block-border-left: "#31BAE9"
+    code-line-numbers: false
+toc: true
+toc-title: Contents
+toc-location: right
+toc-depth: 4
+number-sections: true
+code-line-numbers: true
+code-fold: false
+papersize: "letterpaper"
+editor: visual
+code-block-bg: true
+title-block-banner: true
+title-block-background: "#31BAE9"
+title-block-banner-color: white
+---
+
+## Business Case (Fictional)
+
+NovaTech Solutions, a mid-sized tech company, has experienced an increase in attrition over the past year. The company’s leadership is concerned about this trend and has asked the HR Analytics team to explore patterns and trends in employee attrition. NovaTech already uses SQL for its database operations, making it possible to leverage their existing infrastructure for data analysis and reporting.
+
+The HR Analytics team is tasked with creating:
+
+1.  A detailed report summarizing key trends and insights using SQL-based analyses.
+
+2.  An interactive dashboard that allows stakeholders to explore data dynamically and focus on specific areas, such as departments, roles, and satisfaction levels.
+
+::: {.callout-note appearance="minimal" icon="false"}
+## Aside: Dataset Used
+
+For this demo portfolio project, I used an IBM employee dataset obtained from Kaggle. The dataset was split into two tables:
+
+-   **`employee_info`**: Contains demographic and job-related information.
+
+-   **`employee_exp`**: Includes data on employee experience, such as job satisfaction, job involvement, and work-life balance.
+
+I set up a PostgreSQL database using **pgAdmin** to import these tables and perform analyses. This setup mimics the data pipeline and infrastructure used by many organizations for SQL-based data exploration and reporting.
+
+![](images/clipboard-2548362703.png)
+:::
+
+```{r setting up the SQL connection, echo=TRUE}
+
+#loading packages
+suppressMessages(
+suppressWarnings(
+  pacman::p_load(DBI, 
+                 RPostgres, 
+                 tidyverse,
+                 dplyr,
+                 highcharter)
+)
+)
+
+# Set up connection
+con <- dbConnect(
+  RPostgres::Postgres(),
+  dbname = "employee_experience",
+  host = "localhost",
+  port = 5432,
+  user = "postgres",
+  password = "password"
+)
+
+```
+
+## Dataset Overview
+
+```{sql view_employee_info, connection=con, echo=TRUE}
+
+SELECT *
+FROM employee_info
+LIMIT 10;
+
+```
+
+```{sql view_employee_exp, connection=con, echo=TRUE}
+
+SELECT *
+FROM employee_exp
+LIMIT 10;
+
+```
+
+## Attrition Rate Analysis
+
+### Overall Attrition Rate
+
+```{sql attrition_rate_analyses, connection=con, echo=TRUE}
+
+SELECT ROUND(AVG("Attrition")*100,2) AS attrition_rate
+FROM employee_exp;
+
+```
+
+### Attrition Rate by Organizational Factors
+
+::: panel-tabset
+## Department
+
+```{sql attrition_rate_dep, connection=con, echo=TRUE}
+
+SELECT ei."Department", ROUND(AVG("Attrition")*100,2) AS attrition_rate
+FROM employee_exp AS ee
+LEFT JOIN employee_info AS ei
+ON ee."EmployeeNumber" = ei."EmployeeNumber"
+GROUP BY "Department"
+ORDER BY attrition_rate DESC;
+
+```
+
+```{r attrition_rate_by_dep_bar, echo=TRUE}
+
+# Fetch data from SQL query
+attrition_department <- dbGetQuery(con, "
+  SELECT ei.\"Department\", ROUND(AVG(\"Attrition\")*100,2) AS attrition_rate
+  FROM employee_exp AS ee
+  LEFT JOIN employee_info AS ei
+  ON ee.\"EmployeeNumber\" = ei.\"EmployeeNumber\"
+  GROUP BY \"Department\"
+  ORDER BY attrition_rate DESC;
+")
+
+# Create an interactive bar chart
+hchart(
+  attrition_department,
+  "column",
+  hcaes(x = Department, y = attrition_rate),
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Department") %>%
+  hc_xAxis(title = list(text = "Department")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+
+```
+
+## Job Role
+
+```{sql attrition_rate_role, connection=con, echo=TRUE}
+
+SELECT "JobRole", ROUND(AVG("Attrition")*100,2) AS attrition_rate
+FROM employee_info ei
+JOIN employee_exp ee ON ei."EmployeeNumber" = ee."EmployeeNumber"
+GROUP BY "JobRole"
+ORDER BY attrition_rate DESC;
+
+```
+
+```{r attrition rate job role bar, echo=TRUE}
+
+# Fetch data from SQL query
+attrition_role <- dbGetQuery(con, "
+  SELECT ei.\"JobRole\", ROUND(AVG(\"Attrition\")*100,2) AS attrition_rate
+  FROM employee_info AS ei
+  LEFT JOIN employee_exp AS ee
+  ON ei.\"EmployeeNumber\" = ee.\"EmployeeNumber\"
+  GROUP BY \"JobRole\"
+  ORDER BY attrition_rate DESC;
+")
+
+# Create an interactive bar chart
+hchart(
+  attrition_role,
+  "column",
+  hcaes(x = JobRole, y = attrition_rate),
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Job Role") %>%
+  hc_xAxis(title = list(text = "Job Role")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+```
+
+## Monthly Income
+
+```{sql attrition_rate_income, connection=con, echo=TRUE}
+
+--- Specify a CTE
+WITH Quartiles AS (
+  SELECT PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY "MonthlyIncome") AS Q1,
+         PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY "MonthlyIncome") AS Q2,
+         PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY "MonthlyIncome") AS Q3
+  FROM employee_exp
+)
+
+--- Apply the CTE
+
+SELECT CASE
+         WHEN "MonthlyIncome" < Quartiles.Q1 THEN 
+             CONCAT('Low Income (<', ROUND(Quartiles.Q1::numeric, 2), ')')
+         WHEN "MonthlyIncome" >= Quartiles.Q1 AND "MonthlyIncome" < Quartiles.Q2 THEN 
+             CONCAT('Lower Mid Income (', ROUND(Quartiles.Q1::numeric, 2), '-', ROUND(Quartiles.Q2::numeric, 2), ')')
+         WHEN "MonthlyIncome" >= Quartiles.Q2 AND "MonthlyIncome" < Quartiles.Q3 THEN 
+             CONCAT('Upper Mid Income (', ROUND(Quartiles.Q2::numeric, 2), '-', ROUND(Quartiles.Q3::numeric, 2), ')')
+         ELSE 
+             CONCAT('High Income (>', ROUND(Quartiles.Q3::numeric, 2), ')')
+       END AS income_bracket,
+       ROUND(AVG("Attrition")*100, 2) AS attrition_rate
+FROM employee_exp, Quartiles
+GROUP BY income_bracket
+ORDER BY attrition_rate DESC;
+
+```
+
+```{r attrition rate income bar, echo=TRUE}
+
+# Fetch data from SQL query
+
+attrition_income <- dbGetQuery(con, "
+WITH Quartiles AS (
+  SELECT PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY \"MonthlyIncome\") AS Q1,
+         PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY \"MonthlyIncome\") AS Q2,
+         PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY \"MonthlyIncome\") AS Q3
+  FROM employee_exp
+)
+
+SELECT CASE
+         WHEN \"MonthlyIncome\" < Quartiles.Q1 THEN 
+             CONCAT('Low Income (<', ROUND(Quartiles.Q1::numeric, 2), ')')
+         WHEN \"MonthlyIncome\" >= Quartiles.Q1 AND \"MonthlyIncome\" < Quartiles.Q2 THEN 
+             CONCAT('Lower Mid Income (', ROUND(Quartiles.Q1::numeric, 2), '-', ROUND(Quartiles.Q2::numeric, 2), ')')
+         WHEN \"MonthlyIncome\" >= Quartiles.Q2 AND \"MonthlyIncome\" < Quartiles.Q3 THEN 
+             CONCAT('Upper Mid Income (', ROUND(Quartiles.Q2::numeric, 2), '-', ROUND(Quartiles.Q3::numeric, 2), ')')
+         ELSE 
+             CONCAT('High Income (>', ROUND(Quartiles.Q3::numeric, 2), ')')
+       END AS income_bracket,
+       ROUND(AVG(\"Attrition\")*100, 2) AS attrition_rate
+FROM employee_exp, Quartiles
+GROUP BY income_bracket
+ORDER BY attrition_rate DESC;
+
+")
+
+# Create an interactive bar chart
+hchart(
+  attrition_income,
+  "column",
+  hcaes(x = income_bracket, y = attrition_rate),
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Monthly Income Bracket") %>%
+  hc_xAxis(title = list(text = "Monthly Income")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+
+```
+
+## Years Since Last Promotion
+
+```{sql last_promotion_attrition, connection=con, echo=TRUE}
+
+SELECT CASE 
+         WHEN "YearsSinceLastPromotion" < 2 THEN 'Less than 2'
+         WHEN "YearsSinceLastPromotion" BETWEEN 2 AND 4 THEN 'Between 2 and 4'
+         WHEN "YearsSinceLastPromotion" BETWEEN 5 AND 7 THEN 'Between 5 and 7'
+         WHEN "YearsSinceLastPromotion" > 7 THEN 'More than 7'
+       END AS last_promotion,
+       ROUND(AVG("Attrition") * 100,2) AS attrition_rate
+FROM employee_info ei
+JOIN employee_exp ee ON ei."EmployeeNumber" = ee."EmployeeNumber"
+GROUP BY 
+       CASE 
+         WHEN "YearsSinceLastPromotion" < 2 THEN 'Less than 2'
+         WHEN "YearsSinceLastPromotion" BETWEEN 2 AND 4 THEN 'Between 2 and 4'
+         WHEN "YearsSinceLastPromotion" BETWEEN 5 AND 7 THEN 'Between 5 and 7'
+         WHEN "YearsSinceLastPromotion" > 7 THEN 'More than 7'
+       END
+ORDER BY attrition_rate DESC;
+
+```
+
+```{r attrition promotion bar, echo=TRUE}
+
+# Fetch data from SQL query
+
+attrition_promotion <- dbGetQuery(con, "
+SELECT CASE 
+         WHEN \"YearsSinceLastPromotion\" < 2 THEN 'Less than 2'
+         WHEN \"YearsSinceLastPromotion\" BETWEEN 2 AND 4 THEN 'Between 2 and 4'
+         WHEN \"YearsSinceLastPromotion\" BETWEEN 5 AND 7 THEN 'Between 5 and 7'
+         WHEN \"YearsSinceLastPromotion\" > 7 THEN 'More than 7'
+       END AS last_promotion,
+       ROUND(AVG(\"Attrition\") * 100,2) AS attrition_rate
+FROM employee_info ei
+JOIN employee_exp ee ON ei.\"EmployeeNumber\" = ee.\"EmployeeNumber\"
+GROUP BY 
+       CASE 
+         WHEN \"YearsSinceLastPromotion\" < 2 THEN 'Less than 2'
+         WHEN \"YearsSinceLastPromotion\" BETWEEN 2 AND 4 THEN 'Between 2 and 4'
+         WHEN \"YearsSinceLastPromotion\" BETWEEN 5 AND 7 THEN 'Between 5 and 7'
+         WHEN \"YearsSinceLastPromotion\" > 7 THEN 'More than 7'
+       END
+ORDER BY attrition_rate DESC;
+")
+
+# Create an interactive bar chart
+hchart(
+  attrition_promotion,
+  "column",
+  hcaes(x = last_promotion, y = attrition_rate),
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Years Since Last Promotion") %>%
+  hc_xAxis(title = list(text = "Years Since Last Promotion")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+
+```
+
+## Role Tenure
+
+```{sql years_current_role, connection=con, echo=TRUE}
+
+SELECT CASE 
+         WHEN "YearsInCurrentRole" < 2 THEN 'Less than 2'
+         WHEN "YearsInCurrentRole" BETWEEN 2 AND 4 THEN 'Between 2 and 4'
+         WHEN "YearsInCurrentRole" BETWEEN 5 AND 7 THEN 'Between 5 and 7'
+         WHEN "YearsInCurrentRole" > 7 THEN 'More than 7'
+       END AS years_in_current_role,
+       ROUND(AVG("Attrition") * 100,2) AS attrition_rate
+FROM employee_info ei
+JOIN employee_exp ee ON ei."EmployeeNumber" = ee."EmployeeNumber"
+GROUP BY 
+       CASE 
+         WHEN "YearsInCurrentRole" < 2 THEN 'Less than 2'
+         WHEN "YearsInCurrentRole" BETWEEN 2 AND 4 THEN 'Between 2 and 4'
+         WHEN "YearsInCurrentRole" BETWEEN 5 AND 7 THEN 'Between 5 and 7'
+         WHEN "YearsInCurrentRole" > 7 THEN 'More than 7'
+       END
+ORDER BY attrition_rate DESC;
+
+```
+
+```{r attrition tenure bar, echo=TRUE}
+
+# Fetch data from SQL query
+
+attrition_tenure <- dbGetQuery(con, "
+SELECT CASE 
+         WHEN \"YearsInCurrentRole\" < 2 THEN 'Less than 2'
+         WHEN \"YearsInCurrentRole\" BETWEEN 2 AND 4 THEN 'Between 2 and 4'
+         WHEN \"YearsInCurrentRole\" BETWEEN 5 AND 7 THEN 'Between 5 and 7'
+         WHEN \"YearsInCurrentRole\" > 7 THEN 'More than 7'
+       END AS years_in_current_role,
+       ROUND(AVG(\"Attrition\"),2) * 100 AS attrition_rate
+FROM employee_info ei
+JOIN employee_exp ee ON ei.\"EmployeeNumber\" = ee.\"EmployeeNumber\"
+GROUP BY 
+       CASE 
+         WHEN \"YearsInCurrentRole\" < 2 THEN 'Less than 2'
+         WHEN \"YearsInCurrentRole\" BETWEEN 2 AND 4 THEN 'Between 2 and 4'
+         WHEN \"YearsInCurrentRole\" BETWEEN 5 AND 7 THEN 'Between 5 and 7'
+         WHEN \"YearsInCurrentRole\" > 7 THEN 'More than 7'
+       END
+ORDER BY attrition_rate DESC;
+")
+
+# Create an interactive bar chart
+hchart(
+  attrition_tenure,
+  "column",
+  hcaes(x = years_in_current_role, y = attrition_rate),
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Years in Current Role") %>%
+  hc_xAxis(title = list(text = "Years in Current Role")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+```
+
+## Overtime Status
+
+```{sql attrition_overtime, connection=con, echo=TRUE}
+
+SELECT "OverTime", ROUND(AVG("Attrition")*100,2) AS attrition_rate
+FROM employee_exp
+GROUP BY "OverTime"
+ORDER BY attrition_rate DESC;
+
+```
+
+```{r attrition overtime bar, echo=TRUE}
+
+# Fetch data from SQL query
+
+attrition_overtime <- dbGetQuery(con, "
+SELECT \"OverTime\", ROUND(AVG(\"Attrition\")*100,2) AS attrition_rate
+FROM employee_exp
+GROUP BY \"OverTime\"
+ORDER BY attrition_rate DESC;
+")
+
+# Create an interactive bar chart
+hchart(
+  attrition_overtime,
+  "column",
+  hcaes(x = "OverTime", y = attrition_rate),
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Overtime Status") %>%
+  hc_xAxis(title = list(text = "Overtime Status")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+
+```
+:::
+
+#### Key Findings: Organizational-Level Factors
+
+**Departmental and Job Role Trends**
+
+-   **Department**: The Sales department has the highest attrition rate (20.63%), while Research & Development has the lowest (13.84%). This descriptive pattern suggests that there may be specific factors within the Sales department contributing to higher turnover, such as work pressure or job satisfaction. A deeper investigation into these factors could help identify targeted retention strategies, such as addressing work environment or culture.
+
+-   **Job Role:** Sales Representatives have the highest attrition rate (39.8%), while Research Directors have the lowest (2.50%). This turnover pattern may be partly influenced by the departments these roles belong to, as the Sales department shows the highest attrition rate and the Research & Development department the lowest.
+
+To better understand the organizational-level factors driving attrition, further analysis is needed to investigate if job roles, departments, or both are influencing turnover. If departmental factors (e.g., culture, pressure, unrealistic expectations) are driving attrition, strategies targeting broader cultural or environmental changes in departments like Sales might be more effective. On the other hand, if role-specific factors (e.g., nature of sales work) are contributing to turnover, strategies like role redesign or additional training might be more beneficial.
+
+**Income Bracket and Attrition**
+
+-   Employees earning less than \$2911 a month (25th percentile) have a high attrition rate (29.4%), while those earning more than \$8379 a month (75th percentile) have a low one (10.33%). This suggests a potential relationship between income and attrition, with lower-income employees more likely to leave the organization. This could reflect external factors, such as better opportunities elsewhere, or internal factors like dissatisfaction with compensation. To confirm this relationship, further analysis would be needed to explore how income interacts with other variables such as job satisfaction or career progression.
+
+**Promotion Timing and Tenure:**
+
+-   There appears to be a general trend where attrition rates decrease as tenure increases. This could suggest that employees who have been with the company longer are more likely to stay, perhaps due to stronger organizational ties or more investment in their roles. Further analysis could explore if tenure correlates with other factors like job satisfaction, career progression, or promotion opportunities.
+
+**Years Since Promotion:**
+
+-   There also seems to be a pattern where attrition rates decrease as the number of years since the last promotion increases. Employees who have not been promoted for over five years tend to have low attrition rates, potentially because they have already reached higher levels within the organization where promotion opportunities are limited and with which they are are satisfied. However, more analyses would be needed to understand the nuances of this trend.
+
+**Overtime and Attrition:**
+
+-   Employees who regularly work overtime show a high attrition rate (30.5%). This descriptive pattern suggests that work-life balance challenges may be a factor in turnover, as employees with higher overtime commitments might experience burnout or dissatisfaction. To address this, the company could explore ways to reduce overtime demands, promote work-life balance, and offer additional support for employees experiencing burnout. However, further analysis is required to confirm whether overtime is a direct driver of attrition or if other factors, such as job satisfaction or involvement, are stronger contributors.
+
+### Attrition Rates by Demographic Factors
+
+::: panel-tabset
+## Age
+
+```{sql attrition_age, connection=con, echo=TRUE}
+
+SELECT CASE
+         WHEN "Age" < 30 THEN 'Under 30'
+         WHEN "Age" BETWEEN 30 AND 40 THEN '30-40'
+         WHEN "Age" BETWEEN 41 AND 50 THEN '41-50'
+         ELSE 'Over 50'
+       END AS age_group,
+       ROUND(AVG("Attrition")*100,2) AS attrition_rate
+FROM employee_info ei
+JOIN employee_exp ee ON ei."EmployeeNumber" = ee."EmployeeNumber"
+GROUP BY age_group
+ORDER BY attrition_rate DESC;
+```
+
+```{r attrition age bar, echo=TRUE}
+
+attrition_age <- dbGetQuery(con, "
+  SELECT CASE
+         WHEN \"Age\" < 30 THEN 'Under 30'
+         WHEN \"Age\" BETWEEN 30 AND 40 THEN '30-40'
+         WHEN \"Age\" BETWEEN 41 AND 50 THEN '41-50'
+         ELSE 'Over 50'
+       END AS age_group,
+       ROUND(AVG(\"Attrition\")*100,2) AS attrition_rate
+FROM employee_info ei
+JOIN employee_exp ee ON ei.\"EmployeeNumber\" = ee.\"EmployeeNumber\"
+GROUP BY age_group
+ORDER BY attrition_rate DESC;
+")
+
+# Create the Highcharter bar chart
+hchart(
+  attrition_age,
+  type = "column",  # Bar chart type
+  hcaes(x = age_group, y = attrition_rate),  # Correct column names
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Age") %>%
+  hc_xAxis(title = list(text = "Age")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+```
+
+## Gender
+
+```{sql attrition_gender, connection=con, echo=TRUE}
+
+SELECT "Gender", ROUND(AVG("Attrition")*100,2) AS attrition_rate
+FROM employee_info ei
+JOIN employee_exp ee ON ei."EmployeeNumber" = ee."EmployeeNumber"
+GROUP BY "Gender"
+ORDER BY attrition_rate DESC;
+```
+
+```{r attrition gender bar, echo=TRUE}
+
+attrition_gender <- dbGetQuery(con, "
+  SELECT \"Gender\", ROUND(AVG(\"Attrition\")*100,2) AS attrition_rate
+FROM employee_info ei
+JOIN employee_exp ee ON ei.\"EmployeeNumber\" = ee.\"EmployeeNumber\"
+GROUP BY \"Gender\"
+ORDER BY attrition_rate DESC;
+")
+
+# Create the Highcharter bar chart
+hchart(
+  attrition_gender,
+  type = "column",  # Bar chart type
+  hcaes(x = "Gender", y = attrition_rate),  # Correct column names
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Gender") %>%
+  hc_xAxis(title = list(text = "Gender")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+```
+
+## Distance from Home
+
+```{sql attrition_distance, connection=con, echo=TRUE}
+
+SELECT CASE
+         WHEN "DistanceFromHome" < 5 THEN 'Under 5 km'
+         WHEN "DistanceFromHome" BETWEEN 5 AND 10 THEN '5-10 km'
+         ELSE 'Over 10 km'
+       END AS distance_bracket,
+       ROUND(AVG("Attrition")*100,2) AS attrition_rate
+FROM employee_info ei
+JOIN employee_exp ee ON ei."EmployeeNumber" = ee."EmployeeNumber"
+GROUP BY distance_bracket
+ORDER BY attrition_rate DESC;
+```
+
+```{r attrition distance level bar, echo=TRUE}
+
+attrition_distance <- dbGetQuery(con, "
+  SELECT CASE
+         WHEN \"DistanceFromHome\" < 5 THEN 'Under 5 km'
+         WHEN \"DistanceFromHome\" BETWEEN 5 AND 10 THEN '5-10 km'
+         ELSE 'Over 10 km'
+       END AS distance_bracket,
+       ROUND(AVG(\"Attrition\")*100,2) AS attrition_rate
+FROM employee_info ei
+JOIN employee_exp ee ON ei.\"EmployeeNumber\" = ee.\"EmployeeNumber\"
+GROUP BY distance_bracket
+ORDER BY attrition_rate DESC;
+")
+
+# Create the Highcharter bar chart
+hchart(
+  attrition_distance,
+  type = "column",  # Bar chart type
+  hcaes(x = distance_bracket, y = attrition_rate),  # Correct column names
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Distance from Home") %>%
+  hc_xAxis(title = list(text = "Distance from Home")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+```
+
+## Education Level
+
+```{sql attrition_education_level, connection=con, echo=TRUE}
+
+SELECT 
+    CASE 
+        WHEN "Education" = 1 THEN 'Below College'
+        WHEN "Education" = 2 THEN 'College'
+        WHEN "Education" = 3 THEN 'Bachelor'
+        WHEN "Education" = 4 THEN 'Master'
+        WHEN "Education" = 5 THEN 'Doctor'
+        ELSE 'Unknown'
+    END AS education_level,
+    ROUND(AVG("Attrition")*100, 2) AS attrition_rate
+FROM employee_info ei
+JOIN employee_exp ee ON ei."EmployeeNumber" = ee."EmployeeNumber"
+GROUP BY education_level
+ORDER BY attrition_rate DESC;
+
+```
+
+```{r attrition education level bar, echo=TRUE}
+
+attrition_education <- dbGetQuery(con, "
+  SELECT 
+    CASE 
+      WHEN \"Education\" = 1 THEN 'Below College'
+      WHEN \"Education\" = 2 THEN 'College'
+      WHEN \"Education\" = 3 THEN 'Bachelor'
+      WHEN \"Education\" = 4 THEN 'Master'
+      WHEN \"Education\" = 5 THEN 'Doctor'
+      ELSE 'Unknown'
+    END AS education_level,
+    ROUND(AVG(\"Attrition\") * 100, 2) AS attrition_rate
+  FROM employee_info ei
+  JOIN employee_exp ee ON ei.\"EmployeeNumber\" = ee.\"EmployeeNumber\"
+  GROUP BY education_level
+  ORDER BY attrition_rate DESC;
+")
+
+# Create the Highcharter bar chart
+hchart(
+  attrition_education,
+  type = "column",  # Bar chart type
+  hcaes(x = education_level, y = attrition_rate),  # Correct column names
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Education Level") %>%
+  hc_xAxis(title = list(text = "Education Level")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+
+```
+:::
+
+#### Key Findings: Demographic Factors
+
+**Age**
+
+-   Employees under 30 have the highest attrition rate (27.91%), suggesting that younger employees may be more likely to leave the company. This could reflect a preference for career mobility, personal development opportunities, or dissatisfaction with their current role. In contrast, employees aged 41-50 have the lowest attrition rate (10.56%), potentially indicating greater job stability and satisfaction, as individuals in this age group may have established stronger ties to the organization. Additional analyses would be needed to investigate these hypotheses.
+
+**Gender**
+
+-   Men show a slightly higher attrition rate (17.01%) than women (14.80%). While the difference is not substantial, it could signal a need to investigate gender-specific challenges. For instance, men may face different career pressures, or there may be external factors influencing their decisions to leave the company.
+
+**Distance from Home**
+
+-   There appears to be a trend where employees who work farther from home (over 10 km) tend to have higher attrition rates. A possibility could be that longer commutes may negatively impact employee satisfaction and.or work-life balance. If this is the case, NovaTech might consider offering remote work options, flexible hours, or commuter benefits to address these challenges. However, I would recommend conducting further analyses before making changes to better understand the underlying drivers of this trend.
+
+**Education Level**
+
+-   The highest attrition rate is seen among employees with the lowest education level (i.e., below college, 18.24%), while the lowest attrition rate is observed among those with a doctorate (10.42%). This could reflect several factors: employees with lower education levels may have fewer career advancement opportunities, leading to higher turnover, while those with higher education may have more job security and engagement in their roles. Additionally, employees with higher education levels might be more likely to stay in roles that align with their skills and aspirations, reducing their likelihood of leaving. Overall, more analyses would be needed to more confidently identify the factors contributing to this trend.
+
+### Attrition Rate by Employee Experience Factors
+
+::: panel-tabset
+## Work-Life Balance
+
+```{sql attrition_rate_wlb, connection=con, echo=TRUE}
+
+SELECT 
+    CASE 
+        WHEN "WorkLifeBalance" = 1 THEN 'Bad'
+        WHEN "WorkLifeBalance" = 2 THEN 'Good'
+        WHEN "WorkLifeBalance" = 3 THEN 'Better'
+        WHEN "WorkLifeBalance" = 4 THEN 'Best'
+        ELSE 'Unknown'
+    END AS work_life_balance,
+    ROUND(AVG("Attrition")*100, 2) AS attrition_rate
+FROM employee_exp
+GROUP BY work_life_balance
+ORDER BY work_life_balance;
+```
+
+```{r attrition work life balance bar, echo=TRUE}
+
+# Fetch data from SQL query
+
+attrition_wlb <- dbGetQuery(con, "
+SELECT 
+    CASE 
+        WHEN \"WorkLifeBalance\" = 1 THEN 'Bad'
+        WHEN \"WorkLifeBalance\" = 2 THEN 'Good'
+        WHEN \"WorkLifeBalance\" = 3 THEN 'Better'
+        WHEN \"WorkLifeBalance\" = 4 THEN 'Best'
+        ELSE 'Unknown'
+    END AS work_life_balance,
+    ROUND(AVG(\"Attrition\")*100, 2) AS attrition_rate
+FROM employee_exp
+GROUP BY work_life_balance
+ORDER BY attrition_rate;
+")
+
+# Create an interactive bar chart
+hchart(
+  attrition_wlb,
+  "column",
+  hcaes(x = work_life_balance, y = attrition_rate),
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Work-Life Balance Rating") %>%
+  hc_xAxis(title = list(text = "Work-Life Balance Rating")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+
+```
+
+## Job Satisfaction
+
+```{sql attrition_rate_job_sat, connection=con, echo=TRUE}
+
+SELECT 
+    CASE 
+        WHEN "JobSatisfaction" = 1 THEN 'Low'
+        WHEN "JobSatisfaction" = 2 THEN 'Medium'
+        WHEN "JobSatisfaction" = 3 THEN 'High'
+        WHEN "JobSatisfaction" = 4 THEN 'Very High'
+        ELSE 'Unknown'
+    END AS job_satisfaction,
+    ROUND(AVG("Attrition")*100, 2) AS attrition_rate
+FROM employee_exp
+GROUP BY job_satisfaction
+ORDER BY attrition_rate DESC;
+
+```
+
+```{r attrition rate job sat bar, echo=TRUE}
+
+# Fetch data from SQL query
+attrition_job_sat <- dbGetQuery(con, "
+  SELECT 
+    CASE 
+        WHEN \"JobSatisfaction\" = 1 THEN 'Low'
+        WHEN \"JobSatisfaction\" = 2 THEN 'Medium'
+        WHEN \"JobSatisfaction\" = 3 THEN 'High'
+        WHEN \"JobSatisfaction\" = 4 THEN 'Very High'
+        ELSE 'Unknown'
+    END AS job_satisfaction,
+    ROUND(AVG(\"Attrition\")*100, 2) AS attrition_rate
+FROM employee_exp
+GROUP BY job_satisfaction
+ORDER BY attrition_rate DESC;
+")
+
+# Create an interactive bar chart
+hchart(
+  attrition_job_sat,
+  "column",
+  hcaes(x = job_satisfaction, y = attrition_rate),
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Job Satisfaction") %>%
+  hc_xAxis(title = list(text = "Job Satisfaction")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+
+```
+
+## Relationship Satisfaction
+
+```{sql attrition_rate_rel_sat, connection=con, echo=TRUE}
+
+SELECT 
+    CASE 
+        WHEN "RelationshipSatisfaction" = 1 THEN 'Low'
+        WHEN "RelationshipSatisfaction" = 2 THEN 'Medium'
+        WHEN "RelationshipSatisfaction" = 3 THEN 'High'
+        WHEN "RelationshipSatisfaction" = 4 THEN 'Very High'
+        ELSE 'Unknown'
+    END AS relationship_satisfaction,
+    ROUND(AVG("Attrition")*100, 2) AS attrition_rate
+FROM employee_exp
+GROUP BY relationship_satisfaction
+ORDER BY attrition_rate DESC;
+```
+
+```{r attrition rate rel sat bar, echo=TRUE}
+
+# Fetch data from SQL query
+attrition_rel_sat <- dbGetQuery(con, "
+  SELECT 
+    CASE 
+        WHEN \"RelationshipSatisfaction\" = 1 THEN 'Low'
+        WHEN \"RelationshipSatisfaction\" = 2 THEN 'Medium'
+        WHEN \"RelationshipSatisfaction\" = 3 THEN 'High'
+        WHEN \"RelationshipSatisfaction\" = 4 THEN 'Very High'
+        ELSE 'Unknown'
+    END AS relationship_satisfaction,
+    ROUND(AVG(\"Attrition\")*100, 2) AS attrition_rate
+FROM employee_exp
+GROUP BY relationship_satisfaction
+ORDER BY attrition_rate DESC;
+")
+
+# Create an interactive bar chart
+hchart(
+  attrition_rel_sat,
+  "column",
+  hcaes(x = relationship_satisfaction, y = attrition_rate),
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Relationship Satisfaction") %>%
+  hc_xAxis(title = list(text = "Relationship Satisfaction")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+
+```
+
+## Job Involvement
+
+```{sql attrition_rate_job_inv, connection=con, echo=TRUE}
+
+SELECT 
+    CASE 
+        WHEN "JobInvolvement" = 1 THEN 'Low'
+        WHEN "JobInvolvement" = 2 THEN 'Medium'
+        WHEN "JobInvolvement" = 3 THEN 'High'
+        WHEN "JobInvolvement" = 4 THEN 'Very High'
+        ELSE 'Unknown'
+    END AS job_involvement,
+    ROUND(AVG("Attrition")*100, 2) AS attrition_rate
+FROM employee_exp
+GROUP BY job_involvement
+ORDER BY attrition_rate DESC;
+
+```
+
+```{r attrition rate job inv bar, echo=TRUE}
+
+# Fetch data from SQL query
+attrition_job_inv<- dbGetQuery(con, "
+  SELECT 
+    CASE 
+        WHEN \"JobInvolvement\" = 1 THEN 'Low'
+        WHEN \"JobInvolvement\" = 2 THEN 'Medium'
+        WHEN \"JobInvolvement\" = 3 THEN 'High'
+        WHEN \"JobInvolvement\" = 4 THEN 'Very High'
+        ELSE 'Unknown'
+    END AS job_involvement,
+    ROUND(AVG(\"Attrition\")*100, 2) AS attrition_rate
+FROM employee_exp
+GROUP BY job_involvement
+ORDER BY attrition_rate DESC;
+")
+
+# Create an interactive bar chart
+hchart(
+  attrition_job_inv,
+  "column",
+  hcaes(x = job_involvement, y = attrition_rate),
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Job Involvement") %>%
+  hc_xAxis(title = list(text = "Job Involvement")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+
+```
+
+## Business Travel Frequency
+
+```{sql attrition_rate_travel, connection=con, echo=TRUE}
+
+SELECT "BusinessTravel", ROUND(AVG("Attrition")*100, 2) AS attrition_rate
+FROM employee_exp
+GROUP BY "BusinessTravel"
+ORDER BY attrition_rate DESC;
+```
+
+```{r attrition rate business travel bar, echo=TRUE}
+
+# Fetch data from SQL query
+attrition_travel <- dbGetQuery(con, "
+SELECT \"BusinessTravel\", ROUND(AVG(\"Attrition\")*100, 2) AS attrition_rate
+FROM employee_exp
+GROUP BY \"BusinessTravel\"
+ORDER BY attrition_rate DESC;
+")
+
+# Create an interactive bar chart
+hchart(
+  attrition_travel,
+  "column",
+  hcaes(x = BusinessTravel, y = attrition_rate),
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Business Travel Frequency") %>%
+  hc_xAxis(title = list(text = "Business Travel Frequency")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+
+```
+
+## Performance Rating
+
+```{sql attrition_performance, connection=con, echo=TRUE}
+
+SELECT 
+    CASE 
+        WHEN "PerformanceRating" = 1 THEN 'Low'
+        WHEN "PerformanceRating" = 2 THEN 'Good'
+        WHEN "PerformanceRating" = 3 THEN 'Excellent'
+        WHEN "PerformanceRating" = 4 THEN 'Outstanding'
+        ELSE 'Unknown'
+    END AS performance_rating,
+    ROUND(AVG("Attrition")*100, 2) AS attrition_rate
+FROM employee_exp
+GROUP BY performance_rating
+ORDER BY attrition_rate DESC;
+
+```
+
+```{r attrition rate performance bar, echo=TRUE}
+
+# Fetch data from SQL query
+attrition_performance <- dbGetQuery(con, "
+SELECT 
+    CASE 
+        WHEN \"PerformanceRating\" = 1 THEN 'Low'
+        WHEN \"PerformanceRating\" = 2 THEN 'Good'
+        WHEN \"PerformanceRating\" = 3 THEN 'Excellent'
+        WHEN \"PerformanceRating\" = 4 THEN 'Outstanding'
+        ELSE 'Unknown'
+    END AS performance_rating,
+    ROUND(AVG(\"Attrition\")*100, 2) AS attrition_rate
+FROM employee_exp
+GROUP BY performance_rating
+ORDER BY attrition_rate DESC;
+")
+
+# Create an interactive bar chart
+hchart(
+  attrition_performance,
+  "column",
+  hcaes(x = performance_rating, y = attrition_rate),
+  name = "Attrition Rate"
+) %>%
+  hc_title(text = "Attrition Rate by Supervisor-Rated Performance") %>%
+  hc_xAxis(title = list(text = "Supervisor-Rated Performance")) %>%
+  hc_yAxis(title = list(text = "Attrition Rate (%)")) %>%
+  hc_colors("steelblue")
+
+```
+:::
+
+#### Key Findings: Employee Experience Factors
+
+**Work-Life Balance**
+
+-   Employees who report a 'Bad' work-life balance have a high attrition rate (31.25%). This descriptive trend suggests that poor work-life balance could be a key driver of turnover, as employees struggling to balance their personal and professional lives may seek opportunities that offer more flexibility. Further analysis would be needed to confirm this relationship.
+
+**Job Satisfaction**
+
+-   Employees with low job satisfaction have a high attrition rate (22.84%), while those who report very high levels of satisfaction have a lower attrition rate (11.33%). These descriptive findings suggest the importance of job satisfaction in retention—unsatisfied employees may be more likely to leave. NovaTech could benefit from focusing on improving job satisfaction across the organization, although further analysis is required to determine the exact factors contributing to these trends.
+
+**Relationship Satisfaction**
+
+-   Employees who report low satisfaction with their relationships with colleagues tend to have a high attrition rate (20.65%), while the attrition rate appears similar across other relationship satisfaction levels (medium, high, very high). This descriptive pattern suggests that improving interpersonal relationships and fostering a positive team culture could play a role in retention. However, more detailed analyses would be needed to test the strength and significance of this relationship.
+
+**Job Involvement**
+
+-   Employees with low levels of job involvement have a high attrition rate (33.73%), while those with very high levels of involvement have a low attrition rate (9.03%). This suggests that employees who feel more engaged and invested in their work may be less likely to leave. NovaTech should consider strategies to increase job involvement, such as offering more meaningful tasks and career development opportunities. However, further testing would be needed to confirm these insights.
+
+**Business Travel Frequency**
+
+-   Employees who travel more frequently for work seem to have higher attrition rates than those who do not travel for work. This could be related to the stress, work-life balance challenges, or burnout associated with frequent travel, but more analyses would be needed to better understand this trend and are recommended before implementing solutions, such as flexible schedules or additional time off.
+
+**Performance**
+
+-   No clear pattern emerges from the performance ratings, as employees in the dataset received either an Outstanding or Excellent rating. This lack of variability in performance ratings may limit the ability to identify trends. More differentiated performance assessments or a closer look at factors like role fit or development opportunities may reveal whether performance has a more subtle impact on attrition.
+
+## Deep Dive: Department vs. Job Role
+
+### Employee Experience by Department
+
+```{sql deep_dive_department, connection=con, echo=TRUE}
+
+SELECT "Department", 
+       ROUND(AVG("Attrition") * 100, 2) AS attrition_rate,
+       ROUND(AVG("YearsInCurrentRole"), 2) AS avg_tenure, 
+       ROUND(AVG("JobSatisfaction"), 2) AS avg_job_satisfaction, 
+       ROUND(AVG("RelationshipSatisfaction"), 2) AS avg_relationship_satisfaction,  
+       ROUND(AVG("JobInvolvement"), 2) AS avg_job_involvement, 
+       ROUND(AVG("WorkLifeBalance"), 2) AS avg_work_life_balance, 
+       ROUND(AVG("PerformanceRating"), 2) AS avg_performance
+FROM employee_info
+JOIN employee_exp ON employee_info."EmployeeNumber" = employee_exp."EmployeeNumber"
+GROUP BY "Department";
+
+```
+
+Employee Experience by Job Role
+
+```{sql deep_dive_role, connection=con, echo=TRUE}
+
+SELECT "JobRole", AVG("YearsInCurrentRole") AS avg_tenure, AVG("JobSatisfaction") AS avg_job_satisfaction, AVG("RelationshipSatisfaction") AS avg_relationship_satisfaction,  AVG("JobInvolvement") AS avg_job_involvement, AVG("WorkLifeBalance") AS avg_work_life_balance, AVG("PerformanceRating") AS avg_performance
+FROM employee_info
+JOIN employee_exp ON employee_info."EmployeeNumber" = employee_exp."EmployeeNumber"
+GROUP BY "JobRole";
+```
+
+### Employee Experience in Sales
+
+```{sql deep_dive_department_role, connection=con, echo=TRUE}
+-- Query to calculate average attrition rate by department and job role
+SELECT ei."Department", 
+       ei."JobRole", 
+       ROUND(AVG("Attrition") * 100, 2) AS attrition_rate,
+       ROUND(AVG("YearsInCurrentRole"), 2) AS avg_tenure, 
+       ROUND(AVG("JobSatisfaction"), 2) AS avg_job_satisfaction, 
+       ROUND(AVG("RelationshipSatisfaction"), 2) AS avg_relationship_satisfaction,  
+       ROUND(AVG("JobInvolvement"), 2) AS avg_job_involvement, 
+       ROUND(AVG("WorkLifeBalance"), 2) AS avg_work_life_balance, 
+       ROUND(AVG("PerformanceRating"), 2) AS avg_performance
+FROM employee_exp AS ee
+LEFT JOIN employee_info AS ei
+  ON ee."EmployeeNumber" = ei."EmployeeNumber"
+WHERE ei."Department" = 'Sales'
+GROUP BY ei."Department", ei."JobRole"
+ORDER BY attrition_rate DESC;
+
+```
+
+### Ranking Job Roles Within Departments by Attrition Rate
+
+```{sql rank_job_roles, connection=con, echo=TRUE}
+
+SELECT 
+    "Department",
+    "JobRole",
+    ROUND(AVG("Attrition") * 100, 2) AS attrition_rate,
+    RANK() OVER (PARTITION BY "Department" ORDER BY AVG("Attrition") DESC) AS rank_within_department
+FROM employee_exp
+JOIN employee_info AS ei ON employee_exp."EmployeeNumber" = ei."EmployeeNumber"
+GROUP BY "Department", "JobRole"
+ORDER BY "Department", rank_within_department;
+
+```
+
+## Recommendations
+
+Since this project was focused on showcasing SQL usage, the trends presented are descriptive, based on the data extracted through SQL queries. However, we cannot determine the statistical significance of these differences. To strengthen the findings, follow-up inferential statistical analyses (e.g., using R) are recommended. Without these analyses, the trends in this report should be viewed as preliminary.
+
+1.  I would recommend starting by examining **correlations** to assess the strength and direction of relationships between continuous variables (e.g., satisfaction, tenure, income) and attrition. This will help clarify how these variables are associated with turnover.
+
+2.  A useful next step would be to run a **multiple logistic regression** using variables that predict attrition. This will allow us to evaluate the independent impact of each factor (e.g., income, job role, department) on attrition, while controlling for the effects of other variables.
+
+3.  Another useful step would be to run **predictive analyses** to identify which current employees are at risk of leaving and take proactive action. The **Turnover Analysis App** I developed offers a user-friendly approach to conducting these analyses. It allows users to upload their own datasets and train three machine learning models—logistic regression, random forest, and multilayer perceptron—to predict attrition. By identifying high-risk employees, the app enables timely, targeted interventions.
+
+4.  Finally, conducting a **factor analysis** (e.g., principal components analysis) may help uncover underlying factors (latent variables) that contribute to attrition, such as organizational culture or job stress. This technique can often help simplify complex data by combining related variables into a smaller set of factors, which can sometimes make it easier to understand and address multiple factors contributing to attrition at once.

@@ -1,0 +1,1918 @@
+---
+title: "Employee Turnover Analysis"
+format:
+  html:
+    theme: flatly
+    highlight-style: kate
+    fontsize: 10pt
+    embed-resources: true
+    self-contained-math: true
+    code-fold: true
+    code-summary: "Show the code"
+    code-overflow: wrap
+    code-block-bg: true
+    code-block-border-left: "#31BAE9"
+    code-line-numbers: false
+toc: true
+toc-title: Contents
+toc-location: right
+toc-depth: 4
+number-sections: true
+code-line-numbers: true
+code-fold: false
+papersize: "letterpaper"
+editor: visual
+code-block-bg: true
+title-block-banner: true
+title-block-background: "#31BAE9"
+title-block-banner-color: white
+---
+
+# Introduction
+
+## Business Problem
+
+Over the past year, **Fictional Solutions Inc.** has been grappling with a troubling rise in employee turnover. These departures have disrupted team dynamics, increased recruitment and training costs, and jeopardized critical project deadlines. While exit surveys highlight dissatisfaction with workload, career growth, and recognition, the true drivers of attrition remain unclear, leaving managers uncertain about how to intervene effectively.
+
+This project tackles two key challenges:
+
+1.  **Understanding Turnover Drivers**: Analyzing factors like satisfaction, performance, and workload to uncover the root causes of employee departures.
+
+2.  **Predicting Turnover Risk**: Developing a model to identify employees most likely to leave, enabling proactive, targeted retention strategies.
+
+By uncovering the reasons behind attrition and identifying at-risk employees, Fictional Solutions Inc. can implement data-driven strategies to improve retention and rebuild workforce stability.
+
+***Note**: This is a fictional scenario I created based on a dataset obtained from Kaggle. While hypothetical, it demonstrates how data-driven approaches can help organizations like Fictional Solutions Inc. tackle retention challenges effectively.*
+
+## Project Objectives
+
+In this project , I will:
+
+-   **Prepare**: Clean and preprocess the dataset to look for (and address, if they exist) missing values, outliers, and inconsistencies, ensuring data is ready for analysis.
+
+-   **Explore**: Conduct exploratory data analysis (EDA) to uncover distributions, trends, and relationships among key variables related to employee turnover.
+
+-   **Model**: Apply statistical and machine learning techniques to identify factors associated with employee turnover and predict individuals at high risk of leaving.
+
+-   **Interpret**: Generate actionable insights and provide data-driven recommendations based on the findnigs.
+
+-   **Visualize**: Develop an interactive R Shiny dashboard to present findings in a clear, engaging format for stakeholders.
+
+### **Skills Highlighted**
+
+-   **Data Preparation**: Cleaning, transforming, and pre-processing raw data for analysis.
+
+-   **Statistical Modeling**: Logistic regression for understanding relationships and predicting outcomes.
+
+-   **Machine Learning**: Random forests and neural networks for advanced prediction.
+
+-   **Data Visualization**: Creating clear, insightful visuals to communicate results effectively.
+
+-   **Tools**: Proficiency in R and R Shiny for analysis and dashboard development.
+
+## Dataset Overview
+
+The data comprises 14,999 employee records with the following variables:
+
+| **Variable** | **Type** | **Description** |
+|------------------------|------------------------|------------------------|
+| **`left`** | Binary (Outcome) | Indicates whether an employee left (1 = yes, 0 = no). |
+| **`satisfaction_level`** | Continuous | Level of job satisfaction, ranging from 0 to 1. |
+| **`last_evaluation`** | Continuous | Most recent performance evaluation score, ranging from 0 to 1. |
+| **`number_projects`** | Discrete | Count of projects handled. |
+| **`average_monthly_hours`** | Continuous | Average number of hours worked monthly. |
+| **`time_spent_company`** | Discrete | Years spent in the company. |
+| **`work_accident`** | Binary | Whether the employee had a work accident (1 = yes, 0 = no). |
+| **`promotion_last_5years`** | Binary | Whether the employee was promoted in the last 5 years (1 = yes, 0 = no). |
+| **`department`** | Categorical | Employee's department. |
+| **`salary`** | Categorical | Salary level (e.g., low, medium, high). |
+
+## Modeling Approach
+
+This project takes a structured approach to modeling, starting with simpler methods and progressing to more complex ones to understand and predict employee turnover risk. The goal is to balance interpretability and predictive accuracy while considering the strengths and limitations of each method.
+
+**Outcome Variable and Predictors**
+
+The target variable is **`left`** (binary: 1 = employee left, 0 = employee stayed). The predictors include:
+
+-   **Continuous Variables**: `satisfaction_level`, `last_evaluation`, `average_monthly_hours`
+
+-   **Discrete Variables**: `number_projects`, `time_spent_company`
+
+-   **Binary Variables**: `work_accident`, `promotion_last_5years`
+
+-   **Categorical Variables**: `department`, `salary_level`
+
+**Steps in the Modeling Process**
+
+1.  **Logistic Regression**:\
+    I start with logistic regression as a baseline model. Logistic regression is well-suited for binary outcomes, offering clear insights into the relationships between predictors and the probability of turnover. This step focuses on understanding the relative importance of each predictor and establishing a baseline for predictive performance.
+
+2.  **Multilayer Perceptron (MLP)**:\
+    Next, Itrain a Multilayer Perceptron, an artificial neural network model. MLPs can capture complex, non-linear interactions between predictors and the outcome, potentially uncovering patterns that logistic regression cannot. However, MLPs require careful tuning to prevent overfitting, particularly with smaller datasets.
+
+3.  **Random Forest**:\
+    Finally, Iuse a Random Forest model. This ensemble learning approach builds multiple decision trees and aggregates their outputs, offering robust predictions and reducing overfitting risk. Random Forests are particularly useful when dealing with categorical and continuous predictors, and they provide insights into variable importance.
+
+4.  Evaluating Model Performance:\
+    I compare the performance of the three models by examining their accuracy on a test set. By evaluating all three, I determine which approach offers better predictive accuracy in this context. I also explore pros/cons of each method, and how their suitability might depend on what we're trying to accomplish (e.g., better understanding predictors of turnover vs. predicting future turnover).
+
+::: {.callout-note collapse="true"}
+### Comparing the Three Modeling Approaches
+
+<table>
+<thead>
+<tr class="header">
+<th><p></p></th>
+<th><p>Pros</p></th>
+<th><p>Cons</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><p><strong>Logistic Regression</strong></p></td>
+<td><ul>
+<li><p>Simple, highly interpretable.</p></li>
+<li><p>Coefficients directly explain the effect of features.</p></li>
+<li><p>Provides probabilistic outputs for class membership.</p></li>
+<li><p>Computationally efficient and doesnt require as much data.</p></li>
+</ul></td>
+<td><ul>
+<li><p>Assumes a linear relationship between predictors and outcome.</p></li>
+<li><p>Sensitive to multicollinearity among predictors.</p></li>
+<li><p>Requires pre-processing (e.g., predictor scaling).</p></li>
+<li><p>Limited ability to model complex interactions/patterns.</p></li>
+<li><p>Requires imputation for missing values.</p></li>
+<li><p>More suited to structured/tabular data.</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td><p><strong>Multilayer Perceptron</strong></p></td>
+<td><ul>
+<li><p>Can capture non-linear, complex relationships.</p></li>
+<li><p>Highly customizable (layers, activation functions, etc.).</p></li>
+<li><p>Can handle unstructured daata (e.g., images, audio, text)</p></li>
+</ul></td>
+<td><ul>
+<li><p>Functions as a black box, making interpretability difficult.</p></li>
+<li><p>Computationally intensive.</p></li>
+<li><p>Requires a lot of data (can overfit with insufficient data).</p></li>
+<li><p>Requires pre-processing (e.g., feature scaling, one-hot encoding for categorical variables).</p></li>
+<li><p>Requires imputation for missing values.</p></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td><p><strong>Random Forest</strong></p></td>
+<td><ul>
+<li><p>Can capture non-linear relationships.</p></li>
+<li><p>Reduces overfitting (because of ensemble averaging).</p></li>
+<li><p>Works with mixed data types (e.g., numerical, categorical) with minimal pre-processing.</p></li>
+<li><p>Provides feature importance metrics for insights into predictors.</p></li>
+<li><p>Doesnt require imputation for missing values.</p></li>
+</ul></td>
+<td><ul>
+<li><p>Computationally intensive, especially with large datasets or many trees.</p></li>
+<li><p>May favor features with high cardinality (e.g., categorical variables with many unique values).</p></li>
+<li><p>More suited to structured/tabular data.</p></li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+:::
+
+```{r initial setup, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Initial Setup & Packages ---------------------------------------------------
+#-----------------------------------------------------------------------------
+
+# Clear Environment
+rm(list=ls())
+
+options(digits = 4)
+options(max.print = 2000)
+
+#loading packages
+suppressMessages(
+suppressWarnings(
+  pacman::p_load(
+    readxl,
+    tidyverse, 
+    skimr,
+    ggplot2,
+    plotly,
+    highcharter,
+    caret, # to create confusion matrices
+    randomForest,
+    corrplot,
+    Hmisc,
+    tidymodels,
+    finalfit,
+    performance,
+    pscl, car,
+    datatable,
+    lme4
+  )))
+
+# Turning off scientific notation
+options(scipen = 999)
+
+#-----------------------------------------------------------------------------
+# Importing Data -------------------------------------------------------------
+#-----------------------------------------------------------------------------
+
+employee_retention_data <- read_excel("C:/Users/ClaudieCoulombe/OneDrive - System 3/General P/Employee Turnover/employee_turnover/data/hr_retention_data.xlsx")
+
+```
+
+------------------------------------------------------------------------
+
+# Data Preparation
+
+## Checking for Missing Values
+
+First, we check to see if there is any missing data in our dataset.
+
+```{r data preparation missing values, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Check for Missing Values ---------------------------------------------------
+#-----------------------------------------------------------------------------
+
+sapply(employee_retention_data, function(x) sum(is.na(x)))
+
+```
+
+No missing values were detected in this dataset.
+
+::: {.callout-note collapse="true"}
+## What I would have done had there been missing data
+
+If missing values had been present, I would have approached the issue systematically by:
+
+1.  Understanding the Missing Data: How many values are missing from each column, whether the data is missing at random or not (i.e., whether missingness is related to specific variables).
+
+2.  If Data is Missing at Random: I would use multiple imputation, which works by analyzing how the variable with missing data is related to other variables in the dataset. It creates a model (or equation) to predict what the missing value might be based on those relationships. This process is repeated multiple times to account for uncertainty. After analyzing each dataset separately, the results would be combined to provide final conclusions of what the missing data might be.
+
+3.  If Data is Not Missing at Random: If this is the case, the missingness is related to the missing values themselves. I wouldn't use multiple imputation, because it assumes the missingness is random. Some options I would consider in that case include:
+
+    -   Testing how the results change when I make different assumptions about the missing data (e.g., if satisfaction scores are missing, testing scenario 1 where the missing scores are above average vs. scenario 2 where the missing scores are below average). I would compare the extent to which the coefficients change or are consistent across these scnarios.
+
+    -   Considering external data such as historical datasets from Fictional Solutions Inc (if they are available). For instance, if performance scores correlated highly with satisfaction scores in past datasets, perhaps this pattern could be used to predict missing satisfaction scores in the current data.
+:::
+
+## Checking Data Types
+
+Next, we verify that the variables are stored as the correct data type. We inspect our dataset to see if this is the case.
+
+```{r data preparation data types, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Check Variables and Data Types ---------------------------------------------
+#-----------------------------------------------------------------------------
+
+# Check data types
+ str(employee_retention_data)
+```
+
+We can see that some categorical variables (i.e., left, sales, salary) are stored as character variables, when they should be stored as factors. We convert that in the next step. We then inspect the dataset again to confirm that the change has worked.
+
+```{r data preparation data type correction, echo=TRUE}
+
+# Convert categorical variables (left, sales, salary) to factors
+employee_retention_data <- employee_retention_data %>%
+  mutate(left = as.factor(left),
+         salary = as.factor(salary),
+         sales = as.factor(sales))
+
+# Check data types again
+str(employee_retention_data)
+```
+
+We can also see that there is a typo in some variable names. Specifically, average_montly_hours and Work_accident. We correct those in the code below, and verify that the change was applied.
+
+```{r data preparation typo correction, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Correct Typo in Variable Name ----------------------------------------------
+#-----------------------------------------------------------------------------
+
+employee_retention_data <- employee_retention_data %>%
+  rename(average_monthly_hours = average_montly_hours,
+         work_accident = Work_accident,
+         department=sales)
+
+# Verify that the name correction worked. 
+str(employee_retention_data)
+```
+
+------------------------------------------------------------------------
+
+# Exploratory Data Analysis (EDA)
+
+## Basic Descriptive Statistics
+
+For numeric variables, we calculate some basic descriptive statistics (i.e., mean, standard deviation, minimum, 1st quartile, median, mean, 3rd quartile, and maximum).
+
+```{r summarizing numeric variables, echo=TRUE}
+
+# Customize skimr to include min and max
+my_skim <- skim_with(
+  numeric = sfl(
+    iqr = IQR,
+    min = min,
+    max = max,
+    mean = mean,
+    median = median,
+    sd = sd,
+    q1 = ~ quantile(.x, probs = .25),
+    q3 = ~ quantile(., probs = .75)
+  ),
+  append = TRUE
+)
+
+eda_summary <- my_skim(employee_retention_data)
+
+# Process and round numeric_summary
+numeric_summary <- eda_summary %>%
+  filter(skim_type == "numeric") %>%
+  select(skim_variable, n_missing, numeric.mean, numeric.sd, numeric.min, numeric.max, numeric.q1, numeric.median, numeric.q3, numeric.iqr, numeric.hist) %>%
+  rename(
+    variable = skim_variable,
+    mean = numeric.mean,
+    sd = numeric.sd,
+    min = numeric.min,
+    max = numeric.max,
+    q1 = numeric.q1,
+    median = numeric.median,
+    q3 = numeric.q3,
+    iqr = numeric.iqr,
+    hist=numeric.hist
+  ) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 2)))  # Round all numeric columns to 2 decimal places
+
+numeric_summary
+```
+
+For categorical/factor variables, we find the count for each level.
+
+```{r summarizing categorical variables, echo=TRUE}
+
+# Get counts for each level in each factor variable
+
+xtabs(~ left, data=employee_retention_data)
+
+xtabs(~ salary, data=employee_retention_data)
+
+xtabs(~ department, data=employee_retention_data)
+```
+
+## Correlations
+
+Next, we examine the correlations between our variables, using Pearson's correlation or point-biserial correlation (a special case of Pearson's when correlating a continuous and dichotomous variable).
+
+```{r correlations, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Create a Correlation Matrix Heatmap ----------------------------------------
+#-----------------------------------------------------------------------------
+
+# Convert 'left' to numeric for correlation analysis
+employee_retention_data$left_numeric <- as.numeric(as.character(employee_retention_data$left))
+
+# Select relevant continuous variables
+correlation_data <- employee_retention_data %>%
+  dplyr::select(satisfaction_level, last_evaluation, average_monthly_hours, number_project, time_spend_company, left_numeric)
+
+# Run the correlation matrix with p-values
+cor_results <- rcorr(as.matrix(correlation_data))
+cor_matrix <- round(cor_results$r, 2)  # Correlation coefficients
+p_matrix <- cor_results$P              # P-values
+
+# Convert correlation and p-value matrices to long format
+cor_long <- as.data.frame(as.table(cor_matrix))
+p_long <- as.data.frame(as.table(p_matrix))
+names(cor_long) <- c("x", "y", "value")
+names(p_long) <- c("x", "y", "p_value")
+
+# Merge the correlation and p-value data frames
+cor_data <- merge(cor_long, p_long, by = c("x", "y"))
+
+# Add significance stars based on p-values
+cor_data <- cor_data %>%
+  mutate(
+    significance = case_when(
+      p_value < 0.001 ~ "***",
+      p_value < 0.01 ~ "**",
+      p_value < 0.05 ~ "*",
+      TRUE ~ ""
+    ),
+    label = paste0(round(value, 2), significance)  # Combine value and significance into one label
+  )
+
+# Create the heatmap with highcharter
+highchart() %>%
+  hc_add_series(data = cor_data, type = "heatmap", hcaes(x = x, y = y, value = value)) %>%
+  hc_colorAxis(stops = color_stops(colors = c("#6D9EC1", "white", "#E46726"))) %>%  # Color gradient
+  hc_title(text = "Correlation Matrix of Employee Retention Variables") %>%
+  hc_tooltip(pointFormat = "{point.x} and {point.y}: {point.label}") %>%  # Tooltip with correlation and stars
+  hc_xAxis(categories = colnames(cor_matrix), title = list(text = NULL)) %>%
+  hc_yAxis(categories = colnames(cor_matrix), title = list(text = NULL), reversed = TRUE) %>%
+  hc_plotOptions(heatmap = list(dataLabels = list(enabled = TRUE, format = '{point.label}')))  # Show labels with stars
+
+```
+
+*Note.* `***` for p \< 0.001, `**` for p \< 0.01, `*` for p \< 0.05.
+
+::: {.callout-tip collapse="true"}
+### Key Findings
+
+1.  **Employee Satisfaction and Turnover**: The correlation coefficient of **-0.39**\*\*\* indicates a significant negative relationship between employee satisfaction and turnover. This suggests that as employee satisfaction decreases, the likelihood of employees leaving the organization increases.
+2.  **Number of Projects and Turnover**: The correlation coefficient is **0.02\*\***, indicating a significant albeit quite small positive relationship between number of projects and turnover.
+3.  **Average Monthly Hours and Turnover**: The correlation coefficient is **0.07\*\***, indicating a significant albeit quite small positive relationship between the average number of hours worked monthly and turnover.
+4.  **Time Spent at Company and Turnover:** The correlation coefficient is **0.14\*\*\***, indicating a significant positive relationship.
+:::
+
+## Distributions
+
+Correlations can be helpful, but they don't always tell the full story. To get a better sense of the shape of the data, it can be helpful to inspect it visually. In this section, we produce histograms displaying the distribution of key variables, grouped by turnover status. This can help us get a visual sense of the shape of the data, as well as spot any starting trends.
+
+```{r distributions, echo=TRUE}
+
+# Set theme_classic() as the default theme
+
+theme_set(
+  theme_classic() + 
+    theme(legend.position = "right")
+  )
+
+```
+
+::: panel-tabset
+## Satisfaction Level
+
+```{r hist_sat, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Satisfaction Level by Turnover ---------------------------------------------
+#-----------------------------------------------------------------------------
+
+opacity_level <- 0.5 # Set your desired opacity level here
+
+hist_sat <- plot_ly() # Set transparency for overlap
+hist_sat <- hist_sat %>%
+  add_histogram(
+    data = employee_retention_data[employee_retention_data$left == 0, ], 
+    x = ~satisfaction_level, 
+    name = "Stayed",
+    xbins = list(start = 0, end = 1, size = 0.05), # Fixed bin size
+    marker = list(color = "#00AFBB", 
+                  opacity=opacity_level,
+                  line = list(color = "#00AFBB", width = 1))
+  ) %>%
+  add_histogram(
+    data = employee_retention_data[employee_retention_data$left == 1, ], 
+    x = ~satisfaction_level, 
+    name = "Left",
+    xbins = list(start = 0, end = 1, size = 0.05), # Fixed bin size
+    marker = list(color = "#E7B800", 
+                  opacity=opacity_level,
+                  line = list(color = "#E7B800", width = 1)) 
+  ) %>%
+  layout(
+    barmode = "overlay", # Overlay histograms
+    title = "Satisfaction Level by Employee Turnover Status",
+    xaxis = list(title = "Satisfaction Level"),
+    yaxis = list(title = "Frequency"),
+    legend = list(title = list(text = "Turnover Status"))
+  )
+
+hist_sat
+
+```
+
+## Performance at Last Evaluation
+
+```{r hist_perf, echo=TRUE}
+#-----------------------------------------------------------------------------
+# Employee Performance by Turnover -------------------------------------------
+#-----------------------------------------------------------------------------
+
+hist_perf <- plot_ly() %>%
+  add_histogram(
+    data = employee_retention_data[employee_retention_data$left == 0, ], 
+    x = ~last_evaluation, 
+    name = "Stayed",
+    xbins = list(start = 0, end = 1, size = 0.05), 
+    marker = list(color = "#00AFBB", opacity = 0.5, line = list(color = "#00AFBB", width = 1))
+  ) %>%
+  add_histogram(
+    data = employee_retention_data[employee_retention_data$left == 1, ], 
+    x = ~last_evaluation, 
+    name = "Left",
+    xbins = list(start = 0, end = 1, size = 0.05), 
+    marker = list(color = "#E7B800", opacity = 0.5, line = list(color = "#E7B800", width = 1))
+  ) %>%
+  layout(
+    barmode = "overlay",
+    title = "Employee Performance on Last Evaluation by Turnover Status",
+    xaxis = list(title = "Performance Rating on Last Evaluation"),
+    yaxis = list(title = "Count"),
+    legend = list(title = list(text = "Turnover Status"))
+  )
+hist_perf
+```
+
+## Average Monthly Hours
+
+```{r hist_avg_hours, echo=TRUE}
+#-----------------------------------------------------------------------------
+# Employee Workload (Monthly Hours) by Turnover ------------------------------
+#-----------------------------------------------------------------------------
+
+hist_avg_hours <- plot_ly() %>%
+  add_histogram(
+    data = employee_retention_data[employee_retention_data$left == 0, ], 
+    x = ~average_monthly_hours, 
+    name = "Stayed",
+    xbins = list(start = min(employee_retention_data$average_monthly_hours), 
+                 end = max(employee_retention_data$average_monthly_hours), 
+                 size = 10), 
+    marker = list(color = "#00AFBB", opacity = 0.5, line = list(color = "#00AFBB", width = 1))
+  ) %>%
+  add_histogram(
+    data = employee_retention_data[employee_retention_data$left == 1, ], 
+    x = ~average_monthly_hours, 
+    name = "Left",
+    xbins = list(start = min(employee_retention_data$average_monthly_hours), 
+                 end = max(employee_retention_data$average_monthly_hours), 
+                 size = 10), 
+    marker = list(color = "#E7B800", opacity = 0.5, line = list(color = "#E7B800", width = 1))
+  ) %>%
+  layout(
+    barmode = "overlay",
+    title = "Employee Workload (Based on Average Monthly Hours) by Turnover Status",
+    xaxis = list(title = "Average Monthly Hours"),
+    yaxis = list(title = "Count"),
+    legend = list(title = list(text = "Turnover Status"))
+  )
+hist_avg_hours
+```
+
+## Number of Projects
+
+```{r hist_num_projects, echo=TRUE}
+#-----------------------------------------------------------------------------
+# Employee Workload (Number of Projects) by Turnover -------------------------
+#-----------------------------------------------------------------------------
+
+hist_num_projects <- plot_ly() %>%
+  add_histogram(
+    data = employee_retention_data[employee_retention_data$left == 0, ], 
+    x = ~number_project, 
+    name = "Stayed",
+    xbins = list(start = min(employee_retention_data$number_project), 
+                 end = max(employee_retention_data$number_project), 
+                 size = 1), 
+    marker = list(color = "#00AFBB", opacity = 0.5, line = list(color = "#00AFBB", width = 1))
+  ) %>%
+  add_histogram(
+    data = employee_retention_data[employee_retention_data$left == 1, ], 
+    x = ~number_project, 
+    name = "Left",
+    xbins = list(start = min(employee_retention_data$number_project), 
+                 end = max(employee_retention_data$number_project), 
+                 size = 1), 
+    marker = list(color = "#E7B800", opacity = 0.5, line = list(color = "#E7B800", width = 1))
+  ) %>%
+  layout(
+    barmode = "overlay",
+    title = "Employee Workload (Based on Number of Projects) by Turnover Status",
+    xaxis = list(title = "Number of Projects"),
+    yaxis = list(title = "Count"),
+    legend = list(title = list(text = "Turnover Status"))
+  )
+hist_num_projects
+```
+
+## Time Spent at Company
+
+```{r hist_time_spent, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Time Spent at Company by Turnover ------------------------------------------
+#-----------------------------------------------------------------------------
+
+hist_time_spent <- plot_ly() %>%
+  add_histogram(
+    data = employee_retention_data[employee_retention_data$left == 0, ], 
+    x = ~time_spend_company, 
+    name = "Stayed",
+    xbins = list(start = min(employee_retention_data$time_spend_company), 
+                 end = max(employee_retention_data$time_spend_company), 
+                 size = 1), 
+    marker = list(color = "#00AFBB", opacity = 0.5, line = list(color = "#00AFBB", width = 1))
+  ) %>%
+  add_histogram(
+    data = employee_retention_data[employee_retention_data$left == 1, ], 
+    x = ~time_spend_company, 
+    name = "Left",
+    xbins = list(start = min(employee_retention_data$time_spend_company), 
+                 end = max(employee_retention_data$time_spend_company), 
+                 size = 1), 
+    marker = list(color = "#E7B800", opacity = 0.5, line = list(color = "#E7B800", width = 1))
+  ) %>%
+  layout(
+    barmode = "overlay",
+    title = "Time Spent at Company by Turnover Status",
+    xaxis = list(title = "Number of Years at Company"),
+    yaxis = list(title = "Count"),
+    legend = list(title = list(text = "Turnover Status"))
+  )
+hist_time_spent
+```
+
+## Work Accident
+
+```{r hist_accident, echo=TRUE}
+#-----------------------------------------------------------------------------
+# Employee Workload (Number of Projects) by Turnover -------------------------
+#-----------------------------------------------------------------------------
+
+accident_summary <- employee_retention_data %>%
+  group_by(work_accident, left) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(work_accident) %>%
+  mutate(percentage = count / sum(count) * 100)
+
+# Map levels to meaningful labels
+accident_summary <- accident_summary %>%
+  mutate(left = factor(left, levels = c("0", "1"), labels = c("Stayed", "Left")))
+
+# Create a bar chart
+hist_work_accident <- plot_ly(
+  data = accident_summary,
+  x = ~work_accident,
+  y = ~percentage,
+  color = ~left,  # Use the mapped factor for color
+  type = "bar",
+  colors = c("Stayed" = "#00AFBB", "Left" = "#E7B800"),  # Match color to new labels
+  opacity = 0.5,  # Set bar opacity
+  marker = list(
+    line = list(color = "black", width = 1)  # Add border to bars
+  )
+) %>%
+  layout(
+    barmode = "group",  # Set bar mode to grouped
+    xaxis = list(title = "Work Accident"),
+    yaxis = list(title = "Percentage"),
+    legend = list(title = list(text = "Turnover Status"))  # Legend title
+  )
+hist_work_accident
+```
+
+## Department
+
+```{r hist_dep, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Employee Workload (Number of Projects) by Turnover -------------------------
+#-----------------------------------------------------------------------------
+# Group data by department and left
+    department_summary <- employee_retention_data %>%
+      group_by(department, left) %>%
+      summarise(count = n(), .groups = "drop") %>%
+      group_by(department) %>%
+      mutate(percentage = count / sum(count) * 100)
+    
+    # Map levels to meaningful labels
+    department_summary <- department_summary %>%
+      mutate(left = factor(left, levels = c("0", "1"), labels = c("Stayed", "Left")))
+    
+    # Create a bar chart
+    hist_dep <- plot_ly(
+      data = department_summary,
+      x = ~department,
+      y = ~percentage,
+      color = ~left,  # Use the mapped factor for color
+      type = "bar",
+      colors = c("Stayed" = "#00AFBB", "Left" = "#E7B800"),  # Match color to new labels
+      opacity = 0.5,  # Set bar opacity
+      marker = list(
+        line = list(color = "black", width = 1)  # Add border to bars
+      )
+    ) %>%
+      layout(
+        barmode = "group",  # Set bar mode to grouped
+        xaxis = list(title = "Department"),
+        yaxis = list(title = "Percentage"),
+        legend = list(title = list(text = "Turnover Status"))  # Legend title
+      )
+    hist_dep
+```
+
+## Salary Level
+
+```{r hist_salary, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Employee Workload (Number of Projects) by Turnover -------------------------
+#-----------------------------------------------------------------------------
+# Group data by salary and left
+    salary_summary <- employee_retention_data %>%
+      group_by(salary, left) %>%
+      summarise(count = n(), .groups = "drop") %>%
+      group_by(salary) %>%
+      mutate(percentage = count / sum(count) * 100)
+    
+    # Map levels to meaningful labels
+    salary_summary <- salary_summary %>%
+      mutate(left = factor(left, levels = c("0", "1"), labels = c("Stayed", "Left")))
+    
+    # Create a bar chart
+    hist_salary <- plot_ly(
+      data = salary_summary,
+      x = ~salary,
+      y = ~percentage,
+      color = ~left,  # Use the mapped factor for color
+      type = "bar",
+      colors = c("Stayed" = "#00AFBB", "Left" = "#E7B800"),  # Match color to new labels
+      opacity = 0.5,  # Set bar opacity
+      marker = list(
+        line = list(color = "black", width = 1)  # Add border to bars
+      )
+    ) %>%
+      layout(
+        barmode = "group",  # Group the bars
+        xaxis = list(title = "Salary Level"),
+        yaxis = list(title = "Percentage of Employees"),
+        legend = list(title = list(text = "Turnover Status"))  # Custom legend title
+      )
+    hist_salary
+```
+
+## Promotion in Last 5 Years
+
+```{r hist_promotion, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Employee Workload (Number of Projects) by Turnover -------------------------
+#-----------------------------------------------------------------------------
+
+promotion_summary <- employee_retention_data %>%
+      group_by(promotion_last_5years, left) %>%
+      summarise(count = n(), .groups = "drop") %>%
+      group_by(promotion_last_5years) %>%
+      mutate(percentage = count / sum(count) * 100)
+    
+    # Map levels to meaningful labels
+    promotion_summary <- promotion_summary %>%
+      mutate(left = factor(left, levels = c("0", "1"), labels = c("Stayed", "Left")))
+    
+    # Create a bar chart
+    hist_promotion <- plot_ly(
+      data = promotion_summary,
+      x = ~promotion_last_5years,
+      y = ~percentage,
+      color = ~left,  # Use the mapped factor for color
+      type = "bar",
+      colors = c("Stayed" = "#00AFBB", "Left" = "#E7B800"),  # Match color to new labels
+      opacity = 0.5,  # Set bar opacity
+      marker = list(
+        line = list(color = "black", width = 1)  # Add border to bars
+      )
+    ) %>%
+      layout(
+        barmode = "group",  # Set bar mode to grouped
+        xaxis = list(title = "Promotion in Last 5 Years"),
+        yaxis = list(title = "Percentage"),
+        legend = list(title = list(text = "Turnover Status"))  # Legend title
+      )
+    hist_promotion
+```
+:::
+
+::: {.callout-tip collapse="true"}
+### Key Observations
+
+Purely based on visual inspection of the histograms:
+
+1.  **Satisfaction Level:** There may be a difference in satisfaction levels between employees who stayed and those who left. A large proportion of employees who left have satisfaction scores below 0.50. There also appears to be higher and more consistent satisfaction scores among employees who stayed. Overall, this suggests lower satisfaction levels may be related to higher turnover, and this could be an important variable to further examine.
+
+2.  **Employee Performance on Last Evaluation:** Among employees who left, there appears to be a U-shaped pattern in turnover, with clusters at both lower and higher ends of the performance scale. This "U-shaped" pattern could suggest that turnover may be more common among employees with either low or high performance ratings, while those with mid-range performance ratings (approximately 0.6 to 0.8) may be more likely to stay. However, it's important to note that there are still a high number of employees who stayed across all performance levels, including those on the lower and upper end. This suggests that performance ratings alone may not capture the full story.
+
+3.  **Workload (Based on Average Monthly Hours):** Employees who left tend to cluster at both ends of the workload spectrum. Those working very few hours (around 150 or below) and those working very high hours (above around 250) show higher turnover rates. This pattern suggests that both under-utilization and overwork may be associated with a higher likelihood of turnover.
+
+4.  **Workload (Based on Number of Projects**): Employees who left tend to have either very few projects (e.g., 2) or a high number (6 or 7). The majority of employees who stayed tend to have a mid-range number of projects. This pattern suggests that both under-engagement and over-engagement could relate to turnover.
+:::
+
+## Splitting the Data
+
+Before running any predictive models, the first thing we do is split our data into a training dataset and a testing dataset. We'll randomly assign 70% of the employee rows to the training dataset and the remaining 30% to the test dataset.
+
+We'll use the training dataset to build and train our models and the testing dataset to evaluate them after they've been trained, to see how well they predicts new data they haven't seen before.
+
+This will help us get a sense of the extent to which the models we've build generalize to new data. In other words, it'll **help prevent overfitting** (where the model learns the training data too well and fails to generalize to new data) and help us flag possible issues before this model is deployed in real-world settings.
+
+```{r splitting the data, echo=TRUE}
+
+set.seed(123)  # For reproducibility
+
+# Define proportions
+train_prop <- 0.7
+validation_prop <- 0.15
+test_prop <- 0.15
+
+# Generate a random grouping vector that assigns each row randomly to either training, validation, or test based on proportions defined above. 
+n <- nrow(employee_retention_data)
+group <- sample(c("train", "validation", "test"), size = n, replace = TRUE, prob = c(train_prop, validation_prop, test_prop))
+
+# Split the data into three sets
+train_data <- employee_retention_data[group == "train", ]
+validation_data <- employee_retention_data[group == "validation", ]
+test_data <- employee_retention_data[group == "test", ]
+
+# group the validation and training sets for the logistic regression. This is because the MLP makes use of both in its training - we want to logistic regression to have access to the same data. 
+
+train_validation_data <- rbind(train_data, validation_data)
+```
+
+------------------------------------------------------------------------
+
+# Logistic Regression
+
+The first model we try is a relatively simpler logistic regression.
+
+::: {.callout-note collapse="true"}
+## What is Logistic Regression?
+
+Logistic regression is used to model the relationship between one or more independent variables (predictors) and a binary dependent variable (outcome). Unlike linear regression, which predicts a continuous outcome (like height or salary), logistic regression predicts probabilities for binary outcomes. It estimates the likelihood that an event occurs (e.g., an employee leaving) based on the predictors.
+
+-   Logistic regression works by estimating **odds**. The odds are a way of expressing the likelihood of an event happening compared to it not happening. For example, if the odds of an employee leaving are 3:1, it means they are three times more likely to leave than they are to not leave (i.e., to stay).
+
+-   Logistic regression uses the **logit function** to convert these odds into probabilities that range between 0 and 1. This is done using the logistic function, which ensures that the predicted probabilities always fall within this range.
+
+-   The coefficients of the logistic regression indicate how much the log odds of the outcome change with a one-unit increase in the predictor.
+:::
+
+## Checking for Nested Data Structure
+
+First, it's important to note that our data may have a nested structure. Specifically, employees (level 1) may be nested within departments (level 2). Employees within the same department could share characteristics or experiences (e.g., similar working conditions, management style) that could make their data correlated. If the data is nested by department, the **assumption of independence of observation in standard logistic regression would be violated** and we should be using a multilevel logistic regression. This is important, as patterns can emerge when we look at the data as a whole that may not apply (or could look different) when we look at relationships within groups.
+
+::: {.callout-note collapse="true"}
+## How does multilevel modeling help when data is nested?
+
+-   Multilevel logistic regression partitions the total variance in the outcome into **within-group variance** and **between-group variance** to account for the nested structure of the data. In our case, the within-group variance captures how much the outcome varies between employees within the same department, while the between-group variance captures how much the outcome varies across different departments.
+
+-   In addition to modeling fixed effects (predictors like job satisfaction, hours worked, etc.), multilevel modeling introduces random effects to account for variability in the outcome across groups. The fixed effects represent the **average relationship** between individual predictors and the outcome across all groups, while the random effects allow for **variability in the baseline log-odds** of the outcome across groups. This approach adjusts for group-level differences while capturing individual-level effects, enhancing the accuracy and reliability of the estimates.
+:::
+
+To check if the nesting is substantial within our data, we can compute the **intraclass correlation coefficient (ICC)**. The ICC is the proportion of the total variance in the outcome that can be attributed to the grouping variable (i.e., departments). It is calculated by dividing the group-level variance (i.e., the variance of the random intercepts) by the total variance (variance of random intercepts + residual variance).
+
+```{r checking the ICC for nesting, echo=TRUE}
+
+# First, we rescale our continuous variables by converting them to Z-scores. 
+
+# Rescale continuous variables
+employee_retention_data$satisfaction_level <- scale(employee_retention_data$satisfaction_level)
+
+employee_retention_data$last_evaluation <- scale(employee_retention_data$last_evaluation)
+
+employee_retention_data$average_monthly_hours <- scale(employee_retention_data$average_monthly_hours)
+
+# Fit the model
+model <- glmer(left ~ satisfaction_level + last_evaluation + number_project +
+               average_monthly_hours + time_spend_company + work_accident +
+               promotion_last_5years + salary + (1 | department),
+               data = employee_retention_data, family = binomial)
+
+# Extract random effect variance
+random_effect_variance <- as.numeric(VarCorr(model)$department[1, 1])
+random_effect_variance
+
+# Residual variance for logistic regression
+residual_variance <- pi^2 / 3
+
+# Calculate ICC
+ICC <- random_effect_variance / (random_effect_variance + residual_variance)
+
+ICC
+```
+
+An ICC of 0.0121 suggests that 1.21% of the variance in the outcome (`left`) is attributable to differences between departments, while the remaining variance is at the individual level. This suggests that there is **minimal variation in the outcome across departments**. In other words, departmental grouping has a negligible effect on predicting whether an employee leaves. As a result, a simpler logistic regression without random effects will be considered sufficient.
+
+## Assumption Checking for Logistic Regression
+
+-   **Assumption 1: Binary Outcome Variable**:\
+    The dependent variable must be binary, such as whether an employee left (1) or stayed (0).
+
+-   **Assumption 2: Independence of Observations**:\
+    Each observation should be independent. This is typically ensured through study design (e.g., random sampling). We checked for interdependence among observations within departments (via ICC) and found it not to be a concern.
+
+-   **Assumption 3: Linearity in the Logit**:\
+    Continuous predictors should have a linear relationship with the log odds of the outcome (not the outcome itself). If this assumption is violated, transformations or categorization of predictors may be needed.
+
+    -   **Note:** This assumption only applies to continuous predictors because they can take on a range of values, and we want to see if there's a straight-line trend between those values and the log odds of the outcome. For categorical variables, categories are treated as distinct groups without assumed relationships. The model compares outcomes for each group against a reference group, so linearity does not apply. This means that if the assumption is violated for continuous predictors, we can convert them to categorical variables.
+
+    -   To check the linearity assumption, we can plot each predictor against the logit (the log odds) of the outcome. If the linearity assumption is met, we should expect to see a relatively straight line.
+
+```{r testing linearity, echo=TRUE}
+
+pacman::p_load(performance, DHARMa)
+
+#-----------------------------------------------------------------------------
+# Create the Logistic Regression Model ---------------------------------------
+#-----------------------------------------------------------------------------
+
+outcome <- "left_numeric"
+
+predictors <- c("satisfaction_level", "last_evaluation", "average_monthly_hours", 
+                "number_project", "time_spend_company", "work_accident",
+                "promotion_last_5years",   "salary", "department")
+
+# Train the model on training data
+model <- glm(left_numeric ~ 
+               satisfaction_level + 
+               last_evaluation + 
+               average_monthly_hours + 
+               number_project + 
+               time_spend_company+
+               work_accident+
+               promotion_last_5years+
+               salary+
+               department, 
+             data = train_validation_data, 
+             family = binomial)
+
+#-----------------------------------------------------------------------------
+# Extract Pobabilities and Logits --------------------------------------------
+#-----------------------------------------------------------------------------
+
+probabilities <- predict(model, type = "response")
+
+logit <- log(probabilities/(1-probabilities))
+
+```
+
+::: panel-tabset
+## Satisfaction Level
+
+```{r linearity sat, echo=TRUE}
+
+linearity_sat <- ggplot(train_validation_data, aes(logit,satisfaction_level))+
+  geom_point(size=0.5, alpha=0.5) + 
+  geom_smooth(method="loess") +
+  theme_bw()
+
+linearity_sat
+```
+
+## Performance on Last Evaluation
+
+```{r linearity_perf, echo=TRUE}
+
+linearity_perf <- ggplot(train_validation_data, aes(logit,last_evaluation))+
+  geom_point(size=0.5, alpha=0.5) + 
+  geom_smooth(method="loess") +
+  theme_bw()
+
+linearity_perf
+```
+
+## Average Monthly Hours
+
+```{r linearity_hours, echo=TRUE}
+
+linearity_hours <- ggplot(train_validation_data, aes(logit,average_monthly_hours))+
+  geom_point(size=0.5, alpha=0.5) + 
+  geom_smooth(method="loess") +
+  theme_bw()
+
+linearity_hours
+```
+
+## Number of Projects
+
+```{r linearity_projects, echo=TRUE}
+
+linearity_projects <- ggplot(train_validation_data, aes(logit,number_project))+
+  geom_point(size=0.5, alpha=0.5) + 
+  geom_smooth(method="loess") +
+  theme_bw()
+
+linearity_projects
+```
+
+## Time Spent at Company
+
+```{r linearity_tenure, echo=TRUE}
+
+linearity_tenure <- ggplot(train_validation_data, aes(logit,time_spend_company))+
+  geom_point(size=0.5, alpha=0.5) + 
+  geom_smooth(method="loess") +
+  theme_bw()
+
+linearity_tenure
+```
+
+## Work Accident
+
+```{r linearity_accident, echo=TRUE}
+
+linearity_accident <- ggplot(train_validation_data, aes(logit,work_accident))+
+  geom_point(size=0.5, alpha=0.5) + 
+  geom_smooth(method="loess") +
+  theme_bw()
+
+linearity_accident
+```
+
+## Promotion in Last 5 Years
+
+```{r linearity_promotion, echo=TRUE}
+
+linearity_promotion <- ggplot(train_validation_data, aes(logit,promotion_last_5years))+
+  geom_point(size=0.5, alpha=0.5) + 
+  geom_smooth(method="loess") +
+  theme_bw()
+
+linearity_promotion
+```
+:::
+
+From these plots, we can see that none of the continuous predictors seem to meet the linearity assumption. They all have some kind of curve.
+
+We could try transforming the predictors to see if it helps; but in our case, we'll just convert them to categorical variables. We'll do so by dividing each continuous predictor into quartiles and assigning them into categories labeled "Low," "Low-Mid," "Upper-Mid," and "High."
+
+```{r converting to categories, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Convert Continuous Predictors to Factor Variables --------------------------
+#-----------------------------------------------------------------------------
+
+# We'll try categorizing the predictors into low, medium, and high levels and treating them as categorical variables. We'll use quantiles to define cutoffs. 
+
+train_validation_data <- train_validation_data %>%
+  mutate(
+    satisfaction_level_cat = case_when(
+      satisfaction_level <= quantile(satisfaction_level, 0.25) ~ "Low",
+      satisfaction_level > quantile(satisfaction_level, 0.25) & satisfaction_level <= quantile(satisfaction_level, 0.50) ~ "Lower-Mid",
+      satisfaction_level > quantile(satisfaction_level, 0.50) & satisfaction_level <= quantile(satisfaction_level, 0.75) ~ "Upper-Mid",
+      satisfaction_level > quantile(satisfaction_level, 0.75) ~ "High"
+    ),
+    last_evaluation_cat = case_when(
+      last_evaluation <= quantile(last_evaluation, 0.25) ~ "Low",
+      last_evaluation > quantile(last_evaluation, 0.25) & last_evaluation <= quantile(last_evaluation, 0.50) ~ "Lower-Mid",
+      last_evaluation > quantile(last_evaluation, 0.50) & last_evaluation <= quantile(last_evaluation, 0.75) ~ "Upper-Mid",
+      last_evaluation > quantile(last_evaluation, 0.75) ~ "High"
+    ),
+    average_monthly_hours_cat = case_when(
+      average_monthly_hours <= quantile(average_monthly_hours, 0.25) ~ "Low",
+      average_monthly_hours > quantile(average_monthly_hours, 0.25) & average_monthly_hours <= quantile(average_monthly_hours, 0.50) ~ "Lower-Mid",
+      average_monthly_hours > quantile(average_monthly_hours, 0.50) & average_monthly_hours <= quantile(average_monthly_hours, 0.75) ~ "Upper-Mid",
+      average_monthly_hours > quantile(average_monthly_hours, 0.75) ~ "High"
+    ),
+    number_project_cat = case_when(
+      number_project <= quantile(number_project, 0.25) ~ "Low",
+      number_project > quantile(number_project, 0.25) & number_project <= quantile(number_project, 0.50) ~ "Lower-Mid",
+      number_project > quantile(number_project, 0.50) & number_project <= quantile(number_project, 0.75) ~ "Upper-Mid",
+      number_project > quantile(number_project, 0.75) ~ "High"
+    ),
+    time_spend_company_cat = case_when(
+      time_spend_company <= quantile(time_spend_company, 0.25) ~ "Low",
+      time_spend_company > quantile(time_spend_company, 0.25) & time_spend_company <= quantile(time_spend_company, 0.50) ~ "Lower-Mid",
+      time_spend_company > quantile(time_spend_company, 0.50) & time_spend_company <= quantile(time_spend_company, 0.75) ~ "Upper-Mid",
+      time_spend_company > quantile(time_spend_company, 0.75) ~ "High"
+    )
+  )
+
+# Convert to factors
+train_validation_data <- train_validation_data %>%
+  mutate(across(ends_with("_cat"), as.factor))
+
+```
+
+-   **Assumption 4: Absence of Multicollinearity**:\
+    Predictors should not be too highly correlated with each other. High multicollinearity can make it difficult to assess the effect of each predictor.
+    -   This can be checked by looking at the correlation matrix. As a rule of thumb, anything above 0.7 would be too highly correlated. We would remove those from the model since they would be redundant. From our matrix above, we can see that the predictors don't seem to be too highly correlated.
+    -   This can also be checked using Variance Inflation Factor (VIF) scores, where VIF values above 5 or 10 indicate a potential multicollinearity problem. As seen below, all the VIF values are below 5, suggesting there is no multicollinearity problem.
+    -   In the code below, we calculate the VIF for our predictors.
+
+```{r testing vif, echo=TRUE}
+
+# Check the variance inflation factor scores
+vif(model)
+```
+
+-   **Assumption 5: Large Sample Size:**\
+    Logistic regression generally requires a larger sample size to provide reliable estimates. A rule of thumb is to have at least 10 events (e.g., "1" outcomes) per predictor in the model. This helps ensure stability in the estimates.
+
+    -   In the code below, we check if the sample size is large enough by calculating the number of cases of turnover divided by the number of predictors.
+
+```{r sample size rule of thumb, echo=TRUE}
+
+# Count the number of "1" outcomes 
+left_count <- sum(employee_retention_data$left_numeric == 1)
+
+# Number of predictors (update as needed)
+predictors_count <- length(c("satisfaction_level", "last_evaluation", "average_monthly_hours","number_project", "time_spend_company", "work_accident", "promotion_last_5years", "salary", "department"))
+
+# Divide the number of "1" outcomes by the number of predictors
+left_per_predictor <- left_count / predictors_count
+left_per_predictor
+```
+
+-   **To-Check 1: No Important Outliers:**\
+    While not a formal assumption, logistic regression can be sensitive to outliers. Outliers can disproportionately affect the model's estimates and should be examined before fitting the model.
+
+```{r checking for outliers in numeric variables, echo=TRUE}
+
+# Reshape data into long format for faceting
+numeric_data_long <- employee_retention_data %>%
+  dplyr::select(where(is.numeric), -c(promotion_last_5years, work_accident)) %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "value")
+
+# Create faceted boxplots
+ggplot(numeric_data_long, aes(y = value)) +
+  geom_boxplot(fill = "skyblue") +
+  facet_wrap(~ variable, scales = "free_y") +
+  labs(title = "Box Plots of Numeric Variables", x = "Variable", y = "Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank())
+
+```
+
+::: {.callout-tip collapse="true"}
+### Key Observations from Box Plots
+
+1.  **Average Monthly Hours**:
+    -   The distribution of monthly hours appears fairly centralized, with no significant outliers.
+    -   Most employees have monthly hours between 150 and 250, suggesting a generally consistent work schedule across the dataset.
+2.  **Last Evaluation**:
+    -   Scores for the last evaluation are relatively high, generally clustering between 0.6 and 0.9.
+    -   No obvious outliers are present, indicating that most employees receive evaluations within a similar range.
+3.  **Number of Projects**:
+    -   The number of projects ranges from 2 to 7, with a central concentration around 3 to 5 projects.
+    -   There are no extreme outliers, suggesting that employees’ project loads are fairly consistent.
+4.  **Satisfaction Level**:
+    -   Satisfaction scores span the full range from 0 to 1, indicating diverse levels of employee satisfaction.
+    -   The distribution is slightly skewed toward higher satisfaction scores, with no obvious outliers.
+5.  **Time Spent at the Company**:
+    -   This variable shows some notable outliers, with a few employees spending significantly longer at the company than the majority.
+    -   **Real-World Note**: In a real-world scenario, we would investigate these high values to confirm whether they represent actual long-tenured employees or potential data entry errors. For the purposes of this analysis, we’ll assume that these values are valid and reflect long-tenured employees.
+:::
+
+## Fitting the Logistic Regression
+
+We can now build our logistic regression model using our training data. We regress the binary outcome, `left`, on the categorical predictors we created above.
+
+For each categorical variable, R automatically sets one level as the **reference category** (usually alphabetically first unless specified). All other levels are interpreted relative to this baseline. In our case, R selected the "high" categories as the reference groups.
+
+The results are displayed in terms of **odds ratios**, which get calculated from the model coefficients. The model outputs log-odds coefficients, but these are not as interpretable as odds ratios, and so we present the odds ratios below.
+
+-   **Interpretation**: If an odds ratio is above 1, it means an increase in that predictor increases the odds of the outcome (e.g., leaving), while values below 1 suggest a decrease in odds.
+
+```{r fit the logistic regression on training dataset, echo=TRUE}
+
+# Train the model on training data
+logistic_model <- glm(left_numeric ~ 
+                        satisfaction_level_cat + 
+                        last_evaluation_cat +
+                        average_monthly_hours_cat + 
+                        number_project_cat + 
+                        time_spend_company_cat + 
+                        work_accident + 
+                        promotion_last_5years + 
+                        salary + 
+                        department,
+             data = train_validation_data, 
+             family = binomial)
+
+```
+
+### Evaluating Model Fit
+
+**AIC (Akaike Information Criterion)**: This is a commonly used metric for model fit in logistic regression. Lower AIC values indicate a better fit. You can compare AIC values between different models to see which model fits the data better.
+
+```{r model fit index AIC, echo=TRUE}
+
+AIC(logistic_model)
+```
+
+**Pseudo R-squared**: Unlike linear regression, there’s no true R-squared for logistic regression, but you can use pseudo R-squared values as an approximation of model fit. Examples include **McFadden's R-squared**, **Cox & Snell R-squared**, and **Nagelkerke R-squared**.
+
+```{r model fit index pseudo R2, echo=TRUE}
+
+library(pscl)
+pR2(logistic_model)
+```
+
+### Assessing Training Set Accuracy
+
+For every value, we are predicting a probability of the person leaving: log(odds) = weighted predictors + constant.
+
+-   The log() part of the equation is converting the odds back to a probability, meaning that the output of the model is a guess of the probability that the person will leave.
+
+We then convert these probabilities to binary outcomes (1 = they left, if the probability is greater than 0.5; 0 = they did not leave, if the probability is less than 0.5).
+
+We can evaluate the **accuracy** by seeing how many outcomes the model got right (i.e., comparing predicted outcomes to actual outcomes). If predicted classes is the same as the actual outcome, it gets counted as 1; else as 0. We calculate the number of outcomes the model got right over the total number of outcomes. This gives us the accuracy of the model on the test set.
+
+We do this to obtain a baseline for comparing the accuracy of the testing dataset. If we get high accuracy on the training set and lower on the test set, it suggests the model does not generalize well to new data (i.e. overfitting). If we have low accuracy on both, it suggests that the model generalizes well but may not be a good model.
+
+```{r logistic regression training set accuracy, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Test Predictions on Training Dataset ----------------------------------------
+#-----------------------------------------------------------------------------
+
+# Predict on training data
+predictions <- predict(logistic_model, newdata = train_validation_data, type = "response")
+
+# Convert probabilities to binary predictions (e.g., 0.5 threshold)
+predicted_outcome <- ifelse(predictions > 0.5, 1, 0)
+
+# Evaluate accuracy
+train_accuracy_lr <- round((mean(predicted_outcome == train_validation_data$left_numeric))*100,2)
+
+```
+
+-   **Training set accuracy: `r train_accuracy_lr`**
+
+### Assessing Test Set Accuracy
+
+We now test how accurate the model is when predicting the outcome using a new dataset.
+
+```{r assessing model predictive ability, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Convert Continuous Predictors to Factor Variables In Testing Dataset -------
+#-----------------------------------------------------------------------------
+
+# Note that we have to apply the same quuantiles that we calculated from the training dataset to the testing dataset. 
+
+# Calculate quartiles from training data
+satisfaction_level_quantiles <- quantile(train_validation_data$satisfaction_level, probs = c(0.25, 0.50, 0.75))
+last_evaluation_quantiles <- quantile(train_validation_data$last_evaluation, probs = c(0.25, 0.50, 0.75))
+average_monthly_hours_quantiles <- quantile(train_validation_data$average_monthly_hours, probs = c(0.25, 0.50, 0.75))
+number_project_quantiles <- quantile(train_validation_data$number_project, probs = c(0.25, 0.50, 0.75))
+time_spend_company_quantiles <- quantile(train_validation_data$time_spend_company, probs = c(0.25, 0.50, 0.75))
+
+# Now we use these to categorize the predictors in the testing dataset.
+
+test_data_lr <- test_data %>%
+  mutate(
+    satisfaction_level_cat = case_when(
+      satisfaction_level <= satisfaction_level_quantiles[1] ~ "Low",
+      satisfaction_level > satisfaction_level_quantiles[1] & satisfaction_level <= satisfaction_level_quantiles[2] ~ "Lower-Mid",
+      satisfaction_level > satisfaction_level_quantiles[2] & satisfaction_level <= satisfaction_level_quantiles[3] ~ "Upper-Mid",
+      satisfaction_level > satisfaction_level_quantiles[3] ~ "High"
+    ),
+    last_evaluation_cat = case_when(
+      last_evaluation <= last_evaluation_quantiles[1] ~ "Low",
+      last_evaluation > last_evaluation_quantiles[1] & last_evaluation <= last_evaluation_quantiles[2] ~ "Lower-Mid",
+      last_evaluation > last_evaluation_quantiles[2] & last_evaluation <= last_evaluation_quantiles[3] ~ "Upper-Mid",
+      last_evaluation > last_evaluation_quantiles[3] ~ "High"
+    ),
+    average_monthly_hours_cat = case_when(
+      average_monthly_hours <= average_monthly_hours_quantiles[1] ~ "Low",
+      average_monthly_hours > average_monthly_hours_quantiles[1] & average_monthly_hours <= average_monthly_hours_quantiles[2] ~ "Lower-Mid",
+      average_monthly_hours > average_monthly_hours_quantiles[2] & average_monthly_hours <= average_monthly_hours_quantiles[3] ~ "Upper-Mid",
+      average_monthly_hours > average_monthly_hours_quantiles[3] ~ "High"
+    ),
+    number_project_cat = case_when(
+      number_project <= number_project_quantiles[1] ~ "Low",
+      number_project > number_project_quantiles[1] & number_project <= number_project_quantiles[2] ~ "Lower-Mid",
+      number_project > number_project_quantiles[2] & number_project <= number_project_quantiles[3] ~ "Upper-Mid",
+      number_project > number_project_quantiles[3] ~ "High"
+    ),
+    time_spend_company_cat = case_when(
+      time_spend_company <= time_spend_company_quantiles[1] ~ "Low",
+      time_spend_company > time_spend_company_quantiles[1] & time_spend_company <= time_spend_company_quantiles[2] ~ "Lower-Mid",
+      time_spend_company > time_spend_company_quantiles[2] & time_spend_company <= time_spend_company_quantiles[3] ~ "Upper-Mid",
+      time_spend_company > time_spend_company_quantiles[3] ~ "High"
+    )
+  )
+# Convert to factors
+test_data_lr <- test_data_lr %>%
+  mutate(across(ends_with("_cat"), as.factor))
+
+#-----------------------------------------------------------------------------
+# Test Predictions on Testing Dataset ----------------------------------------
+#-----------------------------------------------------------------------------
+
+# Predict on test data
+predictions <- predict(logistic_model, newdata = test_data_lr, type = "response")
+
+# Convert probabilities to binary predictions (e.g., 0.5 threshold)
+predicted_outcome <- ifelse(predictions > 0.5, 1, 0)
+
+# Evaluate accuracy
+test_accuracy_lr <- round((mean(predicted_outcome == test_data$left_numeric))*100,2)
+
+#-----------------------------------------------------------------------------
+# Save Files for Dashboard ---------------------------------------------------
+#-----------------------------------------------------------------------------
+
+saveRDS(test_data_lr, "C:/Users/ClaudieCoulombe/OneDrive - System 3/General P/Employee Turnover/test_data_LR.rds")
+saveRDS(train_validation_data, "C:/Users/ClaudieCoulombe/OneDrive - System 3/General P/Employee Turnover/train_data_LR.rds")
+saveRDS(logistic_model, "C:/Users/ClaudieCoulombe/OneDrive - System 3/General P/Employee Turnover/logistic_model.rds")
+
+```
+
+-   **Test set accuracy: `r test_accuracy_lr`**
+
+### Testing Precision, Recall, Sensitivity, and Specificity
+
+Accuracy measures the proportion of correct predictions (both true positives and true negatives) out of all predictions. However, it doesn't differentiate between the types of errors made, such as false positives (Type 1 Errors) and false negatives (Type 2 Errors). Understanding the rate of these errors is important when evaluating the performance of a model.
+
+-   **Precision**: Of all the people the model predicted would leave, how many were actually correct?
+
+    -   Precision = True Positives / (True Positives + *False Positives*)
+    -   High precision indicates a lower rate of Type I errors (missing a risk that exists).
+    -   High precision is important when the cost of false positives is high (e.g., when retention interventions are resource-intensive).
+
+-   **Recall (Sensitivity):** Of all the people who actually left, how many did the model correctly identify?
+
+    -   Recall = True Positives / (True Positives + *False Negatives*)
+        -   Recall = (Number of predictions that are correct) / (Number of predictions that are correct + number of predictions that are wrong)
+        -   High recall indicates a lower rate of Type II errors (flagging a risk that isn't there)
+        -   High recall is essential when the cost of false negatives is high (e.g., losing talent).
+
+-   **Specificity**: Of all the people who stayed, how many did the model correctly identify?
+
+    -   Specificity = True Negatives / True Negatives + False Positives
+    -   The focus is to avoid false positives/false alarms.
+
+-   There is often a trade-off between precision and recall. Improving one can lead to a decrease in the other. Often, whether we want to maximize one over the other depends on the context. For example, in medical diagnostics, minimizing false negatives (Type II errors) may be relatively more important in terms of consequences for the patient).
+
+-   To achieve a balance, we can use the **F1 Score**, which is the harmonic mean of precision and recall:
+
+    -   F1 = 2 x ((Precision x Sensitivity)/(Precision + Sensitivity)).
+
+```{r logistic regression precision and recall, echo=TRUE}
+
+# Convert probabilities to binary predictions using a 0.5 threshold
+predicted_outcome <- ifelse(predictions > 0.5, 1, 0)
+
+# Create a confusion matrix (using the caret package)
+conf_matrix <- confusionMatrix(
+  factor(predicted_outcome),
+  factor(test_data$left_numeric),
+  positive = "1"
+)
+
+# Extract precision and recall
+precision_lr <- conf_matrix$byClass["Pos Pred Value"]
+recall_lr <- conf_matrix$byClass["Sensitivity"]
+specificity_lr <- conf_matrix$byClass["Specificity"]
+f1_score_lr <- conf_matrix$byClass["F1"]
+
+# Print the results
+print(paste("Precision:", round(precision_lr, 4)))
+print(paste("Sensitivity/Recall:", round(recall_lr, 4)))
+print(paste("Specificity:", round(specificity_lr, 4)))
+print(paste("F1 Score:", round(f1_score_lr, 4)))
+```
+
+-   These metrics suggest that approximately 71% of employees predicted to leave do leave. (i.e., false positive rate = 29%).
+
+-   Around 61% of employees who left were correctly identified by the model (false negatives = 39%).
+
+-   The F1 score of 0.66 reflects a moderate balance between precision and sensitivity.
+
+-   In our case, we are likely more concerned with false negatives (Type 2 Errors). Missing individuals who are likely to leave can prevent timely interventions, leading to the loss of talent. The relatively high false negative rate we got in our model could be concerning.
+
+------------------------------------------------------------------------
+
+# Neural Network: Multi-Layer Perceptron
+
+To explore whether a more advanced model can improve accuracy, we'll now try a neural network.
+
+::: {.callout-note collapse="true"}
+## How Does a Neural Network Work?
+
+A neural network is a model inspired by how the human brain works. It consists of "neurons" (also called nodes) connected in layers. In a **Multi-Layer Perceptron (MLP)**, the network is organized into different types of "layers":
+
+-   **Input layer:** Receives the input data (e.g., the predictors)
+
+-   **Hidden layer(s):** Layers between the input and output layers, where the network learns to detect patterns in the data.
+
+-   **Output layer:** Produces the final prediction. For classification problems, the output layer typically contains neurons representing each class (e.g., "stay" or "leave"), and the network outputs a probability for each class. For regression problems, there’s often a single neuron in the output layer, providing a continuous value.
+
+**How Neurons Process Inputs**
+
+In a neural network, each "neuron" (or node) in the network receives some inputs, performs calculations, and then decides (1) if the neuron will "fire" (i.e., whether or not to pass its output on to the next layer, and (2) how much of the signal to send.
+
+Each neuron receives inputs from the previous layer (or, in the case of the input layer, the original input data), multiplies each input by a weight that represents its importance, and adds a bias term. The neuron then sums these weighted inputs, and the result is passed through an **activation function** to produce the neuron’s output, which will be sent to the neurons in the next layer.
+
+**Hidden Layers**
+
+The hidden layers are where the network learns and detects patterns. These layers are often referred to as the "black box" of the network because we can’t directly observe the patterns they’re learning.
+
+In research terms, the hidden layers essentially act as **"mediators"**; they take in the inputs and don't just pass the information to the output, but instead "mediate" by processing, transforming, and combining the inputs to build complex representations that can help make the final prediction.
+
+Just as mediators in research help us understand the process behind a relationship, hidden layers help the MLP capture and represent complex underlying processes in the data. They can be thought of as extracting intermediate representations that explain part of the relationship between input data and output prediction. Each hidden layer builds on the patterns detected by the previous layer, making it possible to capture more complex and non-linear relationships.
+
+You can have more than one hidden layer, effectively creating multiple "mediator steps" in the relationship. Each additional layer allows the network to learn and represent more abstract patterns, enabling it to capture even more complex relationships in the data.
+
+**Non-Linearity and Activation Functions**
+
+An important part of neural networks is that they **don’t assume linearity** in the underlying relationship. By stacking multiple layers and using **non-linear activation functions**, an MLP can capture complex, non-linear relationships in the data, allowing it to model a wider range of patterns.
+
+**Activation function**: An activation function is a mathematical function applied to the output of each neuron (node) in a neural network layer. After a neuron receives inputs, it calculates a weighted sum (adding together the inputs multiplied by their weights and adding a bias). This weighted sum is then passed through an activation function, which determines the neuron’s output.
+
+The purpose of the activation function is to introduce non-linearity into the model. Without it, the entire network would behave like a single linear transformation, regardless of how many layers it has. By using activation functions, we allow the network to learn and represent non-linear relationships, which are common in real-world data.
+
+**Training the Neural Network**
+
+Imagine a neural network is making predictions, like guessing whether an employee will stay or leave based on certain inputs. When the network makes a guess, we can **compare the guess to the actual answer** and see how far off it was. This difference is called the **error**.
+
+The process of training a neural network involves **reducing this error** by adjusting the importance (or "weights") the network assigns to each input feature. This is done through a process called **backpropagation**. The network works backwards through its layers to figure out which weights contributed most to the error and need adjusting. Then it adjusts the weights to reduce the error.
+
+This process of making predictions, checking errors, and adjusting weights is repeated many times across the dataset. Each time, the network improves slightly, learning which inputs are more important for accurate predictions.
+
+Over many rounds, the network gets better at making predictions because it has fine-tuned the weights, allowing it to minimize the error and better understand the relationship between inputs and the desired output.
+:::
+
+## Fitting the Neural Network with Keras
+
+We'll build a simple model consisting of 4 layers, using the Keras package:
+
+-   The input layer will accept data with 18 features (i.e., our one-hot-encoded predictors). The first hidden layer will contain 64 neurons with the ReLU activation function (to introduce non-linearity to model complex patterns).
+
+-   The second hidden layer will contain 32 neurons, also with ReLU activation.
+
+-   The third hidden layer will contain 8 neurons, with ReLU activation.
+
+-   The output layer contains 1 neuron with a sigmoid activation function (the activation function suitable for binary classification tasks). The sigmoid activation outputs a probability score for the positive class (e.g., whether an employee will leave).
+
+Each layer is fully connected to the previous one, ensuring all neurons contribute to learning.
+
+In the section below, we can see the model training. The loss generally decreases as the model learns to minimize the error between predictions and outcomes. The accuracy generally increases as the model learns to make better predictions.
+
+```{r trying keras, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Initial Setup --------------------------------------------------------------
+#-----------------------------------------------------------------------------
+
+pacman::p_load(keras)
+
+tensorflow::set_random_seed(42) # setting a seed so the random starting values it assigns to the weights in the model are repeatable.
+
+#-----------------------------------------------------------------------------
+# Setup the Model ------------------------------------------------------------
+#-----------------------------------------------------------------------------
+
+# One-hot encode the categorical predictors
+train_data_encoded <- train_data %>%
+  mutate(across(c(salary, department), as.factor)) %>%
+  model.matrix(~ . - 1, data = .) %>%
+  as.matrix()
+
+validation_data_encoded <- validation_data %>%
+  mutate(across(c(salary, department), as.factor)) %>%
+  model.matrix(~ . - 1, data = .) %>%
+  as.matrix()
+
+test_data_encoded <- test_data %>%
+  select(-contains("cat")) %>%
+  mutate(across(c(salary, department), as.factor)) %>%
+  model.matrix(~ . - 1, data = .) %>%
+  as.matrix()
+
+# Define the model
+model <- keras_model_sequential() %>%
+  layer_dense(units = 64, activation = 'relu', input_shape = c(18)) %>%
+  layer_dense(units = 32, activation = 'relu') %>%
+  layer_dense(units = 8, activation = 'relu') %>%
+  layer_dense(units = 1, activation = 'sigmoid')
+
+# Compile the model
+model %>% compile(
+  optimizer = 'adam',
+  loss = 'binary_crossentropy',
+  metrics = list('accuracy')
+)
+
+#-----------------------------------------------------------------------------
+# Add Predictors and Outcome to the Model -------------------------------------
+#-----------------------------------------------------------------------------
+
+# Specify predictors 
+exclude_columns <- c("left_numeric", "left0", "left1")
+predictors <- setdiff(colnames(train_data_encoded), exclude_columns)
+
+# Convert the training dataset to a matrix (keras works with matrices)
+mlp_data <- as.matrix(train_data_encoded[, predictors])
+
+# Specify what the outcome is using the training dataset. Called 'labels' in machine learning terms, because the outcome is often data that can be seen as the 'right answer' labelled by humans
+labels <- as.matrix(train_data["left_numeric"])
+
+# Do the same two steps above, but for the validation dataset.
+validation_inputs <- as.matrix(validation_data_encoded[, predictors])
+validation_labels <- as.matrix(as.numeric(validation_data[["left_numeric"]]))
+
+# Create a checkpoint that will save to a file the weights every time the validation loss gets better (smaller).
+checkpoint <- callback_model_checkpoint(
+  filepath = "C:/Users/ClaudieCoulombe/OneDrive - System 3/General P/Employee Turnover/best_model.h5",  # Path to save the model
+  monitor = "val_loss",        # Metric to monitor (validation loss)
+  save_best_only = TRUE,       # Only save when the monitored metric improves
+  mode = "min"                 # "min" because we want the lowest validation loss
+)
+
+#-----------------------------------------------------------------------------
+# Train the Model ------------------------------------------------------------
+#-----------------------------------------------------------------------------
+
+# Train the model with the checkpoint callback
+history <- model %>% fit(
+  mlp_data,
+  labels,
+  epochs = 500,
+  batch_size = 32,
+  validation_data = list(validation_inputs, validation_labels),
+  callbacks = list(checkpoint)  # Call the checkpoint after each epoch
+)
+
+#-----------------------------------------------------------------------------
+# Save Files for Dashboard ---------------------------------------------------
+#-----------------------------------------------------------------------------
+
+saveRDS(train_data_encoded, "C:/Users/ClaudieCoulombe/OneDrive - System 3/General P/Employee Turnover/train_data_encoded.rds")
+saveRDS(validation_data_encoded, "C:/Users/ClaudieCoulombe/OneDrive - System 3/General P/Employee Turnover/validation_data_encoded.rds")
+saveRDS(test_data_encoded, "C:/Users/ClaudieCoulombe/OneDrive - System 3/General P/Employee Turnover/test_data_encoded.rds")
+
+```
+
+## Assessing Training Set Accuracy
+
+Let's see how well the model fits the data it was trained on. This is to establish a baseline against which to compare the accuracy on the test set, to determine the extent of overfitting.
+
+```{r MLP training set accuracy, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Evaluate Accuracy on Training Set ------------------------------------------
+#-----------------------------------------------------------------------------
+
+# Evaluate the saved best model
+best_mlp_model <- load_model_hdf5("best_model.h5")  # Load the best model
+
+# Use the saved best model to evaluate accuracy on the test dataset
+
+training_inputs <- as.matrix(train_data_encoded[, predictors])
+training_labels <- as.matrix(as.numeric(train_data[["left_numeric"]]))
+
+train_eval_results_nn <- best_mlp_model %>% evaluate(training_inputs, training_labels, batch_size = 32)
+
+predictions <- best_mlp_model %>% predict(training_inputs)
+
+train_accuracy_nn <- train_eval_results_nn[["accuracy"]]*100
+
+```
+
+-   **Accuracy on training set: `r train_accuracy_nn`%**
+
+## Assessing Test Set Accuracy
+
+Now that we have the accuracy on the training set as the baseline, let's see how well the model does on new data, to get a sense of how well it generalizes.
+
+```{r MLP test set accuracy, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Evaluate Accuracy on Test Set ----------------------------------------------
+#-----------------------------------------------------------------------------
+
+# Use the saved best model to evaluate accuracy on the test dataset
+
+test_inputs <- as.matrix(test_data_encoded[, predictors])
+test_labels <- as.matrix(as.numeric(test_data[["left_numeric"]]))
+
+test_eval_results_nn <- best_mlp_model %>% evaluate(test_inputs, test_labels, batch_size = 32)
+
+predictions <- best_mlp_model %>% predict(test_inputs)
+
+test_accuracy_nn <- test_eval_results_nn[["accuracy"]]*100
+
+```
+
+-   **Accuracy on test set: `r test_accuracy_nn`%**
+-   Pretty good! There doesn't seem to be too much overfitting.
+
+## Testing Precision, Recall, and Specificity
+
+```{r testing precision and recall of neural network, echo=TRUE}
+
+predicted_classes <- ifelse(predictions > 0.5, 1, 0)
+
+confusion <- confusionMatrix(
+  factor(predicted_classes),
+  factor(test_labels),
+  positive = "1"
+)
+
+precision_nn <- confusion$byClass["Precision"]
+recall_nn <- confusion$byClass["Recall"]
+specificity_nn <- confusion$byClass["Specificity"]
+
+# Calculate F1 Score
+f1_score_nn <- confusion$byClass["F1"]
+
+# Print the results
+cat("Precision:", precision_nn, "\n")
+cat("Recall (Sensitivity):", recall_nn, "\n")
+cat("F1 Score:", f1_score_nn, "\n")
+cat("Specificity:", specificity_nn, "\n")
+
+```
+
+For the neural network model, we got good accuracy and F1 scores, even without doing any tuning. It's likely that we could get the model to be even more accurate by tuning the parameters - however, for this demo, we'll stick with this initial model.
+
+Pros of Neural Network: Compared to the logistic regression, we got 11.7% better accuracy than the logistic regression. While the logistic regression model achieve approximately 85% accuracy (15% error rate), the neural network reduced the error rate to just 3%, cutting errors by more than half. In practical terms, if we were to deploy both models in the real world, we would expect the machine learning model to predict turnover correctly for approximately 12 more people out of every 100. We also didn't have to categorize our continuous predictors with the neural network approach, as it can handle non-linearity.
+
+**Cons:** While the neural netowkr is better at making predictions than the logistic regression, it's less easily interpretable. It doesn't provide us with a table with the coefficient estimates for each predictor and a p-value. To make up for this, we can run experiments with the model to see how the predictions would change if we made different changes to the predictors (e.g., if satisfaction scores changed by 5%), but the results still won't be as clear-cut as the output from a logistic regression. We also don't see how the hidden layers operate. Finally, if we trained the model using a different seed, we would get different results, meaning that repeatability could be a problem.
+
+------------------------------------------------------------------------
+
+# Random Forest
+
+One approach that offers more relatively more interpretability than a neural network (but still less than a logistic regression) is a Random Forest. We explore this approach in this section. While not as transparent as regression models, they provide insights into the relative importance of predictors, helping explain why some variables might contribute more to the model's predictions. Like a neural network, it can also capture non-linear relationships and offer an advantage in terms of predictive accuracy. Random Forests are a ensemble learning method that combine many decision trees to predict an outcome.
+
+::: {.callout-note collapse="true"}
+## What is a Decision Tree?
+
+A decision tree is a simple machine learning model that makes predictions by recursively splitting data into subsets based on the values of input features. It's made up of:
+
+-   **Root node:** The starting point of the tree, containing the whole dataset.
+
+-   **Internal nodes:** Points where the data is split based on a feature
+
+-   **Leaf nodes:** Endpoints that represent the final prediction for a subset of data.
+
+The tree branches from the root to the leaf nodes.
+
+The root node starts with all the data, and then chooses the feature and split that best separates the target variable (e.g., satisfaction_level \> 0.5). At each node, the tree repeats the process for the subsets of data, splitting again based on the feature and condition that best separates the target. The tree stops splitting (leaf nodes) when a stopping criteria is met, such as:
+
+-   A node has a minimum number of samples
+
+-   The maximum depth is reached
+
+-   The data in the node is pure (all samples belong to one class).
+
+For classification, each leaf node assigns a class label (e.g., left/stayed). For regression, each leaf node predicts the mean value of the target variable for the data in that node.
+
+At each node, the tree splits the data into 2 or more subsets based on a decision rule. The decision rule is based on one feature and one condition (e.g., satisfaction_level \> 0.5). The algorithm evaluates all features and potential split points to choose the one that optimizes the purity of the resulting nodes.
+
+The tree chooses splits to maximize the "purity" of resulting nodes.
+
+Purity metrics (for classification):
+
+-   Gini impurity: measures how mixed the classes are in a node (smaller is better)
+
+-   Entropy: measures the randomness or disorder of the data
+
+Variance reduction (for regression): measures how much the variability in the outcome is reduced.
+
+-   For example, maybe the first split in the root node is based on satisfaction_level \> 0.5. Employees with high satisfaction go to one branch, others to the other. For employees with high satisfaction, the next split is based on time_spend_company \> 3. This splits highly satisfied employees into short-tenured and long-tenured groups. For employees with satisfaction level \< 0.5 and time_spend_company \> 3, the tree predicts they are likely to leave in a leaf node (class 1).
+
+**How does prediction work?** For a new data point, the tree starts at the root node and follows the splits down to a specific leaf node. The prediction for that data point comes from the value in the leaf node it reaches.
+:::
+
+::: {.callout-note collapse="true"}
+## How Does a Random Forest Work?
+
+A **Random Forest** builds multiple decision trees and combines their predictions to improve accuracy and robustness. Instead of relying on just one tree, it uses a forest of many decision trees. It's used for classification and regression tasks, and can offer more interpretability than other machine learning techniques like neural networks.
+
+A Random Forest is essentially a collection (or "forest") of decision trees. Each tree in the forest makes its own prediction for a data point, and the forest aggregates these predictions to produce the final result. In classification, the forest predicts the majority class from all trees' votes. In regression, the forest predicts the average of all trees' predictions.
+
+This is helpful because individual decision trees are prone to overfitting, especially when they grow deep. By combining multiple trees, random forests can help reduce overfitting.
+
+Two main features can help ensure that each tree in the forest is different, which reduces correlation between trees:
+
+-   \(1\) Bagging: Each tree is trained on a random sample (with replacement) of the training data. This means some data points are used multiple times in one tree while others are left out (called out-of-bag samples).
+
+-   \(2\) Feature Randomization: At each node, only a random subset of features is considered for splitting. This forces the trees to learn different patterns, even if they are trained on similar data.
+
+Since each tree is trained on a bootstrap sample, the data points not included (OOB samples) can be used to estimate the model's error, without needing a separate validation set.
+
+How it works:
+
+-   Data Sampling: Take multiple bootstrap samples from the training data. Train one tree on each sample.
+
+-   Tree Building: Grow each decision tree to its maximum depth. At each split, use a random subset of features to determine the best split.
+
+-   Aggregation: For classification, use the majority voting across all trees to figure out the outcome (left/stayed). For regression, use the average prediction from all the trees.
+:::
+
+## Fitting the Random Forest
+
+```{r trying a random forest approach, echo=TRUE}
+
+pacman::p_load(randomForest)
+
+# We have to set the number of predictors to randomly choose from at each split. Often, the default value for classification is  the square root of the total number of predictors.
+
+k <- round(sqrt(7))
+
+train_validation_data_rf <- train_validation_data %>%
+  select(-contains("_cat"), -left_numeric)
+
+# Step 1: Train the Random Forest model
+set.seed(123) # For reproducibility
+rf_model <- randomForest(
+  left ~ satisfaction_level + last_evaluation + average_monthly_hours +
+    number_project + time_spend_company + salary + department,
+  data = train_validation_data_rf,
+  ntree = 500, # Number of trees
+  mtry = k,    # Number of predictors randomly sampled at each split (tuning parameter)
+  importance = TRUE # To assess variable importance
+)
+
+# Step 2: Evaluate the model
+# View the model summary
+print(rf_model)
+
+# We can see that this is a classification model. The model used 500 trees, and chose 3 random variables at each split in the trees. The out-of-bag (OOB) error rate was 0.83%, which means that the model misclassified around 0.83% of instances during training (this is very low, indicating strong performance on the training data). The confusion matrix tells us that the model correctly classified 8015 instances as "stayed" and misclassified 14 as "stayed" (error rate of 0.17%), and the model correctly classified 2437 as "left" and incorrectly classified 74 as "left" (error rate 2.95%). This means that the model performs well overall, with slightly higher error rate for employees who left (but this can be common in datasets where one class is less common).
+
+#-----------------------------------------------------------------------------
+# Save Files for Dashboard ---------------------------------------------------
+#-----------------------------------------------------------------------------
+
+saveRDS(test_data, "C:/Users/ClaudieCoulombe/OneDrive - System 3/General P/Employee Turnover/test_data_RF.rds")
+saveRDS(train_validation_data_rf, "C:/Users/ClaudieCoulombe/OneDrive - System 3/General P/Employee Turnover/train_data_RF.rds")
+saveRDS(rf_model, "C:/Users/ClaudieCoulombe/OneDrive - System 3/General P/Employee Turnover/rf_model.rds")
+
+```
+
+## Assessing Accuracy on Training Set
+
+```{r random forest accuracy on training set, echo=TRUE}
+
+# Generate predictions
+test_preds <- predict(rf_model, newdata = train_validation_data_rf)
+
+# Confusion matrix
+confusion_matrix <- table(train_validation_data_rf$left, test_preds)
+print(confusion_matrix)
+
+# Calculate accuracy
+train_accuracy_rf <- (sum(diag(confusion_matrix)) / sum(confusion_matrix))*100
+
+```
+
+-   **Accuracy on training set: `r train_accuracy_rf`**
+
+## Assessing Accuracy on Test Set
+
+```{r random forest accuracy on test set, echo=TRUE}
+
+# Generate predictions
+test_preds <- predict(rf_model, newdata = test_data)
+
+# Confusion matrix
+confusion_matrix <- table(test_data$left, test_preds)
+print(confusion_matrix)
+
+# Calculate test accuracy
+test_accuracy_rf <- (sum(diag(confusion_matrix)) / sum(confusion_matrix))*100
+
+```
+
+-   **Accuracy on test set: `r test_accuracy_rf`**
+
+## Testing Precision, Recall, Specificity
+
+```{r random forest testing precision and sensitivity, echo=TRUE}
+
+# Create confusion matrix
+confusion <- confusionMatrix(
+  factor(test_preds),
+  factor(test_data$left),
+  positive = "1"
+)
+
+# Extract precision and recall
+precision_rf <- confusion$byClass["Precision"]
+recall_rf <- confusion$byClass["Recall"]
+specificity_rf <- confusion$byClass["Specificity"]
+f1_score_rf <-  confusion$byClass["F1"]
+
+# Print the results
+cat("Precision:", precision_rf, "\n")
+cat("Recall (Sensitivity):", recall_rf, "\n")
+cat("Specificity:", specificity_rf, "\n")
+cat("F1 Score:", f1_score_rf, "\n")
+```
+
+------------------------------------------------------------------------
+
+# Comparing Models
+
+|   | Logistic Regression | Multilayer Perceptron | Random Forest |
+|------------------|------------------|------------------|------------------|
+| Training Set Accuracy | `r train_accuracy_lr` | `r train_accuracy_nn` | `r train_accuracy_rf` |
+| Test Set Accuracy | `r test_accuracy_lr` | `r test_accuracy_nn` | `r test_accuracy_rf` |
+| Precision | `r precision_lr` | `r precision_nn` | `r precision_rf` |
+| Sensitivity (Recall) | `r recall_lr` | `r recall_nn` | `r recall_rf` |
+| F1 Score | `r f1_score_lr` | `r f1_score_nn` | `r f1_score_rf` |
+
+**Conclusion:**
+
+The Random Forest model demonstrates superior performance across all evaluated metrics, suggesting it is the most effective for predicting employee turnover in this context. However, it's essential to consider the complexity and interpretability of the model. While Random Forest and Neural Networks offer high accuracy, Logistic Regression provides more straightforward interpretability, which can be valuable for understanding the influence of individual predictors on turnover.
+
+------------------------------------------------------------------------
+
+# Predictor Importance
+
+::: panel-tabset
+## Logistic Regression
+
+```{r logistic regression output, echo=TRUE}
+
+#-----------------------------------------------------------------------------
+# Display Table --------------------------------------------------------------
+#-----------------------------------------------------------------------------
+
+suppressWarnings({
+library(sjPlot)
+})
+
+suppressMessages({
+  
+tab_model(logistic_model, 
+          title = "Logistic Regression Model Results",
+          show.ci = FALSE,   
+          show.se = TRUE,    
+          show.stat = TRUE,
+          show.reflvl = TRUE,
+          prefix.labels = "varname",
+          CSS = list(
+            css.depvarhead = 'text-align: left;',
+            css.centeralign = 'text-align: left;',
+            css.summary = 'font-weight: bold;'
+          ))
+  })
+
+```
+
+## Random Forest
+
+```{r check variable importance from rf model, echo=TRUE}
+
+# Check variable importance on the test set
+
+importance(rf_model) # Numeric importance
+
+varImpPlot(rf_model) # Plot variable importance
+
+# The mean decrease accuracy tells us how much accuracy decreases when a specific variable is excluded from the model. Higher values mean the variable is more important for accurate predictions. The mean decrease gini tells us how much each variable contributes to reducing impurity (gini index) across all trees. Higher values mean the variable plays a bigger role in splitting nodes and improving classification. Column 0 tells us how important each variable is in predicting staying, while column 1 tells us how important each predictor is in predicting leaving. 
+
+# We can see that satisfaction level is much more important for predicting employees who left than those who stayed. This suggests that low satisfaction is associated with turnover. We can also see that removing satisfaction level would reduce the model's accuracy the most. It also has the highest impact on reducing node impurity. 
+```
+:::
+
+-   Both models identify **satisfaction level** as the most critical predictor of employee turnover.
+
+    -   Logistic Regression highlights that employees with low satisfaction levels are **8.2 times more likely** to leave compared to employees with high satisfaction levels.
+
+    -   RF ranks satisfaction level as the top feature by both Mean Decrease Accuracy and Mean Decrease Gini.
+
+-   Employees with **low salaries** are significantly more likely to leave.
+
+    -   Logistic Regression assigns an Odds Ratio of **6.27** for low salary, and RF includes salary as a moderately important predictor.
+
+-   **Workload and Tenure**:
+
+    -   Both models suggest that balanced workloads and moderate tenure (e.g., **average monthly hours**, **number of projects**, and **time spent at the company**) reduce turnover risk.
+
+    -   Logistic Regression quantifies the relationships (e.g., Odds Ratio = 0.15 for lower-mid monthly hours), while RF provides rankings of feature importance.
+
+-   **Departments**:
+
+    -   Logistic Regression identifies **R&D** and **management** as departments with lower turnover risks. RF ranks department as a lower-priority feature overall.
+
+-   For **actionable insights** (e.g., presenting findings to stakeholders, prioritizing retention initiatives) use Logistic Regression to interpret predictor importance and direction.
+
+-   For **predictive tasks** (e.g., identifying high-risk employees for targeted interventions), rely on Random Forest for its higher accuracy and robust predictions.
+
+------------------------------------------------------------------------
+
+# Limitations
+
+-   Other variables not measured may also have a strong effect on turnover risk (e.g., employee-manager relationships, company culture, external job market conditions).
+
+-   The findings might not generalize to other organizations with different turnover rates, employees, environments.
+
+-   The dataset is cross-sectional, making it difficult to infer causality or temporal relationships (e.g., whether low satisfaction causes turnover or vice versa).
+
+-   Not all predictors (e.g., department, tenure) are actionable or easily changeable, which limits the organization’s ability to act on these insights.
+
+------------------------------------------------------------------------
+
+# Recommended Next Steps
+
+-   **Follow Up Mediation Study:** To gain deeper insights into the drivers of turnover, we recommend a follow-up study using mediation analysis to examine whether factors like workload and time spent at the company influence turnover through their effects on job satisfaction. Specifically, we propose a study design with three separate data collection points to reduce common method variance and strengthen causal interpretation. At **Time 1**, predictors such as workload and tenure would be measured; at **Time 2**, several months later, job satisfaction would be assessed; and at **Time 3**, turnover intentions or actual turnover data would be collected. This temporally separated design would clarify the extent to which job satisfaction mediates the relationship between workload, tenure, and turnover, providing actionable insights on whether improving satisfaction could mitigate turnover risks. These findings would inform targeted retention strategies, such as adjusting workloads or enhancing satisfaction-focused initiatives.
+
+-   Low job satisfaction was found to be a key driver of turnover. Organizations could consider digging deeper into the root cause(s) by conducting regular surveys and/or focus groups. Leveraging job satisfaction theories such as Herzberg’s Two-Factor Theory could be helpful in categorizing these factors into workplace "hygiene" issues (e.g., salary, motivation) and motivators (e.g., recognition, meaningful work, growth opportunities). Organizations could consider working with HR and I-O psychology practitioners to develop interventions addressing these issues. A good initial step could be to pilot a job enrichment program in departments where satisfaction levels are lower.
+
+-   Other key factors that could be important to monitor and address include workload patterns and pay disparities.
