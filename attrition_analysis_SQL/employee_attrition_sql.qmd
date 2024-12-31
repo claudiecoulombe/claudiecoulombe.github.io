@@ -983,11 +983,17 @@ GROUP BY "Department";
 
 ```
 
-Employee Experience by Job Role
+### Employee Experience by Job Role
 
 ```{sql deep_dive_role, connection=con, echo=TRUE}
 
-SELECT "JobRole", AVG("YearsInCurrentRole") AS avg_tenure, AVG("JobSatisfaction") AS avg_job_satisfaction, AVG("RelationshipSatisfaction") AS avg_relationship_satisfaction,  AVG("JobInvolvement") AS avg_job_involvement, AVG("WorkLifeBalance") AS avg_work_life_balance, AVG("PerformanceRating") AS avg_performance
+SELECT "JobRole", 
+      ROUND(AVG("YearsInCurrentRole"),2) AS avg_tenure,
+      ROUND(AVG("JobSatisfaction"),2) AS avg_job_satisfaction, 
+      ROUND(AVG("RelationshipSatisfaction"),2) AS avg_relationship_satisfaction,  
+      ROUND(AVG("JobInvolvement"),2) AS avg_job_involvement, 
+      ROUND(AVG("WorkLifeBalance"),2) AS avg_work_life_balance, 
+      ROUND(AVG("PerformanceRating"),2) AS avg_performance
 FROM employee_info
 JOIN employee_exp ON employee_info."EmployeeNumber" = employee_exp."EmployeeNumber"
 GROUP BY "JobRole";
