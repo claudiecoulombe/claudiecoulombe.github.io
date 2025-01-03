@@ -1,0 +1,26 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Portfolio"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: analytics_portfolio.qmd
+        text: Analytics Portfolio
+      - href: research_publications.qmd
+        text: Research & Publications
+      - href: resume.qmd
+        text: Resume
+      - href: CV.qmd
+        text: CV
+format:
+  html:
+    theme: trestles
+    css: styles.css
+    toc: true
+
+editor: visual
+

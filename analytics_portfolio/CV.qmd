@@ -1,0 +1,12 @@
+---
+title: "CV"
+format:
+  html:
+    toc: false
+---
+
+<iframe src="ClaudieCoulombeCV.pdf" width="100%" height="800px" style="border: none;">
+
+Your browser does not support embedded PDFs. Please download it [here](ClaudieCoulombeCV.pdf).
+
+</iframe>

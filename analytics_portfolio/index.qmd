@@ -1,0 +1,52 @@
+---
+title: Claudie Coulombe
+image: profile.webp
+toc: false
+about:
+  template: trestles
+  image-width: 16em
+  image-shape: round
+  links:
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/claudie-coulombe/
+    - icon: github
+      text: Github
+      href: https://github.com/claudiecoulombe
+    - icon: r-square-fill
+      text: ResearchGate
+      href: https://www.researchgate.net/profile/Claudie-Coulombe
+    - icon: mortarboard-fill
+      text: Google Scholar
+      href: https://bit.ly/claudiecoulombe_googlescholar
+---
+
+Hi there! I’m Claudie Coulombe (pronounced “klo-dee koo-lomb”). I love using people analytics to help organizations find data-informed ways to create better workplaces. Outside of work, you'll find me hanging out with my two dogs, crocheting away, or volunteering at my local animal shelter. Feel free to check out my work and connect!
+
+## Education
+
+**Master's in Industrial-Organizational Psychology**
+
+University of Guelph \| Ontario, Canada \| 2020-2022
+
+**Honours Bachelor of Arts in Psychology**
+
+McGill University \| Quebec, Canada \| 2015-2019
+
+## Recent Experience
+
+**Data Scientist** \| Jan 2024 - Present
+
+-   System-3, Toronto, Ontario
+
+**Research Associate, Data Analytics** \| Oct 2022 - Jan 2024
+
+-   System-3, Toronto, Ontario
+
+**Research Assistant, Science** \| Aug 2021 - Aug 2022
+
+-   nugget.ai, Toronto, Ontario
+
+**Consultant** \| Sept 2020 - June 2022
+
+-   Organization & Management Solutions, Guelph, Ontario
