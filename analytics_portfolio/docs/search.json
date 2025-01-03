@@ -110,5 +110,12 @@
     "title": "CV",
     "section": "",
     "text": "&lt;p&gt;Your browser does not support embedded PDFs. Please download it &lt;a href=\"ClaudieCoulombeCV.pdf\"&gt;here&lt;/a&gt;.&lt;/p&gt;"
+  },
+  {
+    "objectID": "analytics_portfolio.html#app-for-optimizing-group-formation",
+    "href": "analytics_portfolio.html#app-for-optimizing-group-formation",
+    "title": "Analytics Portfolio",
+    "section": "(3) App for Optimizing Group Formation",
+    "text": "(3) App for Optimizing Group Formation\n💡 View app | 💻 View Code\n\n\nKey Skills Used: R, Shiny, Data Analysis, Optimization, Visualization (plotly), Algorithm Design\nThis Shiny app helps users create teams/groups that are optimize to minimize or maximize differences on selected characteristics (e.g., personality test scores, decision-making styles, competency scores). Users can upload their own dataset or use a demo dataset, select variables for analysis, and specify the desired number and sizes of groups. The app offers two optimization approaches:\n\nRecursive Brute-Force Partitioning: Finds the optimal solution by evaluating all possible groupings (recommended for small datasets).\nRandom Sampling: Generates near-optimal solutions efficiently for larger datasets.\n\nThe app displays optimized groups, scores their cohesiveness or diversity based on user-selected goals, and provides visualizations for deeper insights.\nPotential applications in people analytics include:\n\nCreating cohesive teams for high-trust, collaborative projects.\nForming diverse groups for brainstorming or innovation-focused tasks.\nAllocating training participants into balanced groups for optimal learning experiences."
   }
 ]
