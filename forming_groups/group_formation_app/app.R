@@ -4,6 +4,7 @@ library(ggplot2)
 library(DT)
 library(tidyverse)
 library(plotly)
+library(shinyBS)
 
 # Helper function to calculate the score of groups
 score_groups <- function(groups, distance_matrix) {
@@ -326,14 +327,37 @@ ui <- fluidPage(
                )
     ),
     
-    tabPanel("Main App",
+    tabPanel("App",
              sidebarLayout(
+               
                sidebarPanel(
                  fileInput("datafile", "Upload Dataset (CSV or Excel)", 
                            accept = c(".csv", ".xlsx")),
+                 div(textOutput("row_count"),  style = "margin-bottom: 12px;"),
                  uiOutput("id_column_selector"), 
                  uiOutput("column_selector"),
+                 div(
+                   span(
+                     textOutput("total_combinations", inline = TRUE),
+                     tags$span(
+                       tags$b("ⓘ"), 
+                       id = "info_icon",
+                       style = "margin-left: 5px; cursor: pointer; color: #007bff; font-size: 16px;"
+                     )
+                   ),
+                   bsTooltip(
+                     "info_icon",
+                     title = "The total possible combinations are calculated as factorial(total rows) divided by the product of factorials of group sizes, adjusted for group order. For example, if we have 12 people and want to create three groups of 4 people each, the formula is 12! / (4! * 4! * 4! * 3!).",
+                     placement = "right",
+                     trigger = "hover"
+                   ),
+                   style = "margin-bottom: 12px;"
+                 ),
                  textInput("group_sizes", "Specify Group Sizes (comma-separated)", "4, 4, 4"),
+                 div(
+                   actionButton("auto_suggest", "Auto-Suggest Group Sizes"),
+                   style = "margin-bottom: 12px;"
+                 ),
                  radioButtons("optimize", "Optimize for:",
                               choices = list("Maximize Differences Within Groups" = "maximize", 
                                              "Maximize Similarity Within Groups" = "minimize"),
@@ -341,6 +365,7 @@ ui <- fluidPage(
                  numericInput("iterations", "Number of Iterations (for Sampling)", 1000, min = 100, max = 10000),
                  actionButton("run", "Create Groups")
                ),
+               
                mainPanel(
                  tabsetPanel(
                    tabPanel("Recursive Brute Force Partitioning",
@@ -460,12 +485,14 @@ server <- function(input, output, session) {
       return("Total combinations are too large to compute.")
     }
     
-    # Calculate factorials
-    total_combinations <- factorial(n) / prod(factorial(group_sizes))
+    # Calculate total combinations
+    total_combinations <- factorial(n) / (prod(factorial(group_sizes)) * factorial(length(group_sizes)))
     
     # Return result as formatted text
     paste("Total possible combinations:", format(total_combinations, big.mark = ","))
   })
+  
+  
   
   # Code to Execute Both Approaches
   
@@ -516,7 +543,9 @@ server <- function(input, output, session) {
   
   all_partitions <- function(groups, remaining) {
     if (length(remaining) == 0) {
-      return(list(groups))
+      # Normalize group order to avoid duplicates
+      normalized_groups <- groups[order(sapply(groups, min))]
+      return(list(normalized_groups))
     }
     results <- list()
     for (i in seq_along(groups)) {
@@ -526,9 +555,12 @@ server <- function(input, output, session) {
         results <- c(results, all_partitions(new_groups, remaining[-1]))
       }
     }
+    # Filter valid partitions and normalize their order
     results <- Filter(function(x) sum(sapply(x, length)) == sum(group_sizes), results)
-    return(results)
+    results <- lapply(results, function(partition) partition[order(sapply(partition, min))])
+    return(unique(results))
   }
+  
   
   ### Recursive Brute Force
   
