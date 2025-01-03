@@ -47,13 +47,13 @@ This project explores patterns of employee attrition at NovaTech Solutions, a fi
 
 💡 [View app](https://5yurvz-claudiecoulombe.shinyapps.io/group_formation_app/) \| 💻 [View Code](https://github.com/claudiecoulombe/claudiecoulombe.github.io/tree/main/forming_groups/group_formation_app)
 
-![](images/clipboard-2877337497.png)
+![](images/clipboard-1084400637.png)
 
 ![](images/clipboard-2475268341.png)
 
 *Key Skills Used: R, Shiny, Data Analysis, Optimization, Visualization (plotly), Algorithm Design*
 
-This Shiny app helps users create teams/groups that are optimize to minimize or maximize differences on selected characteristics (e.g., personality test scores, decision-making styles, competency scores). Users can upload their own dataset or use a demo dataset, select variables for analysis, and specify the desired number and sizes of groups. The app offers two optimization approaches:
+This Shiny app helps users create teams/groups that are optimized to minimize or maximize differences on selected characteristics (e.g., personality test scores, decision-making styles, competency scores). Users can upload their own dataset or use a demo dataset, select variables for analysis, and specify the desired number and sizes of groups. The app offers two optimization approaches:
 
 -   **Recursive Brute-Force Partitioning**: Finds the optimal solution by evaluating all possible groupings (recommended for small datasets).
 

@@ -1,11 +1,11 @@
 name: turnover_analysis
-title: Employee Turnover App
+title: employee_turnover_app
 username: 5yurvz-claudiecoulombe
 account: 5yurvz-claudiecoulombe
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 13629077
-bundleId: 9585273
+bundleId: 9602900
 url: https://5yurvz-claudiecoulombe.shinyapps.io/turnover_analysis/
 version: 1
 asMultiple: FALSE

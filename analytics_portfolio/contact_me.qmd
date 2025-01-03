@@ -1,0 +1,16 @@
+---
+title: "Get in Touch"
+format:
+  html:
+    toc: false
+---
+
+Thank you for visiting my portfolio! If you have questions, ideas, or want to connect, I’d love to hear from you!
+
+- ✉️ Email: [claudie.coulombe@outlook.com](mailto:claudie.coulombe@outlook.com)
+- 👥 LinkedIn: [https://www.linkedin.com/in/claudie-coulombe/](https://www.linkedin.com/in/claudie-coulombe/)
+- ⚙️️ GitHub: [https://github.com/claudiecoulombe](https://github.com/claudiecoulombe)
+
+
+
+

@@ -16,6 +16,8 @@ website:
         text: Resume
       - href: CV.qmd
         text: CV
+      - href: contact_me.qmd
+        text: Get in Touch
 format:
   html:
     theme: trestles

@@ -68,6 +68,16 @@ ui <- fluidPage(
         color: #FFB74D;
         margin-bottom: 10px;
       }
+      .footer {
+        text-align: center;
+        font-size: 10px; /* Small font size */
+        font-style: italic; /* Italicized text */
+        color: #555;
+        padding: 10px 0;
+        margin-top: 20px;
+        border-top: 1px solid #ddd;
+        background-color: #f8f9fa;
+      }
     "))
   ),
   
@@ -389,6 +399,10 @@ ui <- fluidPage(
                  )
                )
              )
+    ),
+    # Footer section
+    div(class = "footer",
+        "© Claudie Coulombe 2025. All rights reserved."
     )
   )
 )

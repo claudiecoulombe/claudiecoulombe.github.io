@@ -5,7 +5,7 @@ account: 5yurvz-claudiecoulombe
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 13660439
-bundleId: 9602595
+bundleId: 9602876
 url: https://5yurvz-claudiecoulombe.shinyapps.io/group_formation_app/
 version: 1
 asMultiple: FALSE

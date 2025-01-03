@@ -33,7 +33,6 @@ ui <- navbarPage(
   "Employee Turnover Analysis",
   id = "main_navbar",   # Assign an ID to the navbarPage
   
-  
   # Home Page
   tabPanel("Home",
            fluidPage(
@@ -1347,8 +1346,12 @@ ui <- navbarPage(
         )
       )
     )
-  )
+  ),
   
+  footer = tags$div(
+    style = "text-align: center; padding: 10px; background-color: #f8f9fa; color: #333; font-size: 12px; font-style: italic;",
+    tags$small("© 2025 Claudie Coulombe. All rights reserved.")
+  )
 )
 
 #-----------------------------------------------------------------------------#

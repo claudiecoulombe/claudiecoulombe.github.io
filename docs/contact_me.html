@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Portfolio - Analytics Portfolio</title>
+<title>Portfolio - Get in Touch</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -93,7 +93,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./analytics_portfolio.html" aria-current="page"> 
+    <a class="nav-link" href="./analytics_portfolio.html"> 
 <span class="menu-text">Analytics Portfolio</span></a>
   </li>  
   <li class="nav-item">
@@ -109,7 +109,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">CV</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./contact_me.html"> 
+    <a class="nav-link active" href="./contact_me.html" aria-current="page"> 
 <span class="menu-text">Get in Touch</span></a>
   </li>  
 </ul>
@@ -129,7 +129,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Analytics Portfolio</h1>
+<h1 class="title">Get in Touch</h1>
 </div>
 
 
@@ -146,57 +146,14 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>On this page, you’ll find a collection of projects I’ve created to showcase my approach to tackling business challenges in people analytics, data science, and data analysis.</p>
-<section id="turnover-prediction-app" class="level2">
-<h2 class="anchored" data-anchor-id="turnover-prediction-app"><strong>(1) Turnover Prediction App</strong></h2>
-<p>💡<a href="https://5yurvz-claudiecoulombe.shinyapps.io/turnover_analysis/">View app</a> | 💻 <a href="https://github.com/claudiecoulombe/claudiecoulombe.github.io/tree/main/employee_turnover_app">View Code</a></p>
-<p><img src="images/clipboard-2506617704.png" class="img-fluid"></p>
-<p><em>Key Skills Used: R, Shiny, Quarto, Exploratory Data Analysis, Data Visualization (ggplot2, highcharter, plotly), Logistic Regression, Random Forest, Multilayer Perceptron</em></p>
-<p>Built in R Shiny, this app offers an interactive platform for employee turnover analysis. Users can upload their own dataset (or use the default dataset integrated into the app for demonstration purposes), choose which variable(s) to use as predictors and which as the outcome, train three machine learning models—logistic regression, random forest, and multilayer perceptron—and tune hyperparameters. The app allows users to evaluate model performance on both training and test sets, predict which employees are at risk of turnover, download a CSV with risk predictions, and run mini experiments to see how adjusting different predictors would influence turnover risk probabilities.</p>
-<p>While designed with turnover analysis as the primary use case, the app’s framework can easily be adapted to any binary classification problem, making it a versatile tool for a variety of predictive analysis tasks in people analytics and in other fields.</p>
-<p>Examples of extensions of this app in <strong>people analytics</strong> include:</p>
+<p>Thank you for visiting my portfolio! If you have questions, ideas, or want to connect, I’d love to hear from you!</p>
 <ul>
-<li>Predicting promotion likelihood;</li>
-<li>Predicting if a candidate will accept (1) or decline (0) a job offer;</li>
-<li>Predicting if an employee will complete the onboarding process (1) or leave prematurely (0);</li>
-<li>Predicting if an employee is likely to succeed (1) or not (0) after transitioning to a new role.</li>
-</ul>
-<p>Examples of extensions of this app in <strong>other fields</strong> include:</p>
-<ul>
-<li>Sales/Marketing: Predicting the likelihood of a customer churning (1) or not (0).</li>
-<li>Finance: Predicting if a transaction or account activity is fraudulent (1) or not (0).</li>
-<li>Healthcare: Predicting if a patient will be readmitted to the hospital within a specific time frame (1) or not (0).</li>
-<li>Manufacturing: Predicting whether a piece of equipment will fail (1) or not fail (0) in a given time frame.</li>
-</ul>
-</section>
-<section id="exploring-employee-attrition-with-sql" class="level2">
-<h2 class="anchored" data-anchor-id="exploring-employee-attrition-with-sql">(2) Exploring Employee Attrition with SQL</h2>
-<p>📊 <a href="../attrition_analysis_SQL/docs/employee_attrition_sql.html">View Report</a> | 💻 <a href="https://github.com/claudiecoulombe/claudiecoulombe.github.io/tree/main/attrition_analysis_SQL">View Code</a></p>
-<p><em>Key Skills Used: PostgreSQL, pgAdmin, Integrating SQL with R, Data Visualization (ggplot2, highcharter), Quarto, Report Building</em></p>
-<p>This project explores patterns of employee attrition at NovaTech Solutions, a fictional mid-sized tech company, using SQL for data extraction, transformation, and analysis, and R for visualization. The dataset was modeled in a PostgreSQL database, simulating real-world HR analytics workflows. Descriptive trends were analyzed to uncover potential areas of focus for improving retention. Actionable recommendations for next steps are provided.</p>
-<hr>
-</section>
-<section id="app-for-optimizing-group-formation" class="level2">
-<h2 class="anchored" data-anchor-id="app-for-optimizing-group-formation">(3) App for Optimizing Group Formation</h2>
-<p>💡 <a href="https://5yurvz-claudiecoulombe.shinyapps.io/group_formation_app/">View app</a> | 💻 <a href="https://github.com/claudiecoulombe/claudiecoulombe.github.io/tree/main/forming_groups/group_formation_app">View Code</a></p>
-<p><img src="images/clipboard-1084400637.png" class="img-fluid"></p>
-<p><img src="images/clipboard-2475268341.png" class="img-fluid"></p>
-<p><em>Key Skills Used: R, Shiny, Data Analysis, Optimization, Visualization (plotly), Algorithm Design</em></p>
-<p>This Shiny app helps users create teams/groups that are optimized to minimize or maximize differences on selected characteristics (e.g., personality test scores, decision-making styles, competency scores). Users can upload their own dataset or use a demo dataset, select variables for analysis, and specify the desired number and sizes of groups. The app offers two optimization approaches:</p>
-<ul>
-<li><p><strong>Recursive Brute-Force Partitioning</strong>: Finds the optimal solution by evaluating all possible groupings (recommended for small datasets).</p></li>
-<li><p><strong>Random Sampling</strong>: Generates near-optimal solutions efficiently for larger datasets.</p></li>
-</ul>
-<p>The app displays optimized groups, scores their cohesiveness or diversity based on user-selected goals, and provides visualizations for deeper insights.</p>
-<p>Potential applications in <strong>people analytics</strong> include:</p>
-<ul>
-<li>Creating cohesive teams for high-trust, collaborative projects.</li>
-<li>Forming diverse groups for brainstorming or innovation-focused tasks.</li>
-<li>Allocating training participants into balanced groups for optimal learning experiences.</li>
+<li>✉️ Email: <a href="mailto:claudie.coulombe@outlook.com">claudie.coulombe@outlook.com</a></li>
+<li>👥 LinkedIn: <a href="https://www.linkedin.com/in/claudie-coulombe/">https://www.linkedin.com/in/claudie-coulombe/</a></li>
+<li>⚙️️ GitHub: <a href="https://github.com/claudiecoulombe">https://github.com/claudiecoulombe</a></li>
 </ul>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
