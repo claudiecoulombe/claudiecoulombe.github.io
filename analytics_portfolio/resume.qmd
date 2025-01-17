@@ -5,8 +5,18 @@ format:
     toc: false
 ---
 
+## Data Science & Analytics
+
 <iframe src="ClaudieCoulombeResume.pdf" width="100%" height="800px" style="border: none;">
 
 Your browser does not support embedded PDFs. Please download it [here](ClaudieCoulombeResume.pdf).
+
+</iframe>
+
+## HR Research
+
+<iframe src="ClaudieCoulombeResume_Research.pdf" width="100%" height="800px" style="border: none;">
+
+Your browser does not support embedded PDFs. Please download it [here](ClaudieCoulombeResume_Research.pdf).
 
 </iframe>
