@@ -75,7 +75,7 @@ In this project , I will:
 The data comprises 14,999 employee records with the following variables:
 
 | **Variable** | **Type** | **Description** |
-|------------------------|------------------------|------------------------|
+|----|----|----|
 | **`left`** | Binary (Outcome) | Indicates whether an employee left (1 = yes, 0 = no). |
 | **`satisfaction_level`** | Continuous | Level of job satisfaction, ranging from 0 to 1. |
 | **`last_evaluation`** | Continuous | Most recent performance evaluation score, ranging from 0 to 1. |
@@ -1809,7 +1809,7 @@ cat("F1 Score:", f1_score_rf, "\n")
 # Comparing Models
 
 |   | Logistic Regression | Multilayer Perceptron | Random Forest |
-|------------------|------------------|------------------|------------------|
+|----|----|----|----|
 | Training Set Accuracy | `r train_accuracy_lr` | `r train_accuracy_nn` | `r train_accuracy_rf` |
 | Test Set Accuracy | `r test_accuracy_lr` | `r test_accuracy_nn` | `r test_accuracy_rf` |
 | Precision | `r precision_lr` | `r precision_nn` | `r precision_rf` |
